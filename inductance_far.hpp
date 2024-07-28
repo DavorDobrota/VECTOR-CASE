@@ -10,7 +10,7 @@
 #include "structs.h"
 #include "sum_lookup_table_far.h"
 
-#if defined(USE_AVX) || defined(USE_AVX512)
+#if defined(USE_SSE) || defined(USE_AVX) || defined(USE_AVX512)
 #include "immintrin.h"
 #endif
 
@@ -42,7 +42,9 @@ double calculate_mutual_inductance_far(
     // Variable which will store the result of the main loop
     FP_TYPE M_12 = 0.0;
 
-#ifdef USE_AVX
+#if defined(USE_SSE)
+    __m128d M_12_vec = _mm_set1_pd(0.0);
+#elif defined(USE_AVX)
     __m256d M_12_vec = _mm256_set1_pd(0.0);
 #elif defined(USE_AVX512)
     __m512d M_12_vec = _mm512_set1_pd(0.0);
@@ -115,7 +117,34 @@ double calculate_mutual_inductance_far(
             FP_TYPE save_second_loop_denom_1 = loop_denom_1;
             FP_TYPE save_second_loop_denom_2 = loop_denom_2;
 
-        #ifdef USE_AVX
+        #if defined(USE_SSE)
+            __m128d loop_denom_1_vec = _mm_set1_pd(loop_denom_1);
+            __m128d loop_denom_2_vec = _mm_set1_pd(loop_denom_2);
+
+            __m128d loop_R_1_sub_r_1_vec = _mm_set1_pd(loop_R_1_sub_r_1);
+            __m128d loop_R_2_sub_r_2_vec = _mm_set1_pd(loop_R_2_sub_r_2);
+
+            for (uint32_t n = 0; n < precision.n_terms; n += 2) {
+                __m128d inner_L_1_vec = _mm_loadu_pd(&inner_L_1_arr[n]);
+                __m128d inner_loop_denom_1_vec = _mm_loadu_pd(&inner_denom_1_arr[n]);
+                __m128d inner_loop_denom_2_vec = _mm_loadu_pd(&inner_denom_2_arr[n]);
+
+                inner_loop_denom_1_vec = _mm_mul_pd(inner_loop_denom_1_vec, loop_denom_1_vec);
+                inner_loop_denom_2_vec = _mm_mul_pd(inner_loop_denom_2_vec, loop_denom_2_vec);
+
+                __m128d numerator = _mm_mul_pd(
+                    _mm_mul_pd(inner_L_1_vec, loop_R_1_sub_r_1_vec),
+                    _mm_mul_pd(
+                        loop_R_2_sub_r_2_vec,
+                        _mm_sub_pd(inner_loop_denom_1_vec, inner_loop_denom_2_vec)
+                    )
+                );
+
+                __m128d lookup_table_vec = _mm_loadu_pd(&lookup_table_far[l][k][n]);
+
+                M_12_vec = _mm_add_pd(M_12_vec, _mm_mul_pd(lookup_table_vec, numerator));
+            }
+        #elif defined(USE_AVX)
             __m256d loop_denom_1_vec = _mm256_set1_pd(loop_denom_1);
             __m256d loop_denom_2_vec = _mm256_set1_pd(loop_denom_2);
 
@@ -192,7 +221,11 @@ double calculate_mutual_inductance_far(
         loop_denom_2 = save_first_loop_denom_2;
     }
 
-#ifdef USE_AVX
+#if defined(USE_SSE)
+    double temp[2];
+    _mm_storeu_pd(temp, M_12_vec);
+    M_12 += temp[0] + temp[1];
+#elif defined(USE_AVX)
     double temp[4];
     _mm256_storeu_pd(temp, M_12_vec);
     M_12 += temp[0] + temp[1] + temp[2] + temp[3];

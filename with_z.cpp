@@ -322,11 +322,11 @@ int main() {
     FP_TYPE volatile value;
 //    float volatile value_float;
     for (int i = 0; i < 10000; ++i) {
-        value = calculate_mutual_inductance_double_fast(
-                data.N_1, data.L_1, data.R_1, data.r_1,
-                data.N_2, data.L_2, data.R_2, data.r_2,
-                (double) i * 0.0001, 1.0);
-//        value = calculate_mutual_inductance_near(data, precision, (FP_TYPE) i * 0.0001f, 1.0);
+//        value = calculate_mutual_inductance_double_fast(
+//                data.N_1, data.L_1, data.R_1, data.r_1,
+//                data.N_2, data.L_2, data.R_2, data.r_2,
+//                (double) i * 0.0001, 1.0);
+        value = calculate_mutual_inductance_near(data, precision, (FP_TYPE) i * 0.0001f, 1.0);
 //        value_float = calculate_mutual_inductance_float_fast_avx(
 //                data.N_1, data.L_1, data.R_1, data.r_1,
 //                data.N_2, data.L_2, data.R_2, data.r_2,

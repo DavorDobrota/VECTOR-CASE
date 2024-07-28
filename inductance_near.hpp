@@ -11,7 +11,7 @@
 #include "structs.h"
 #include "sum_lookup_table_near.h"
 
-#if defined(USE_AVX) || defined(USE_AVX512)
+#if defined(USE_SSE) || defined(USE_AVX) || defined(USE_AVX512)
 #include "immintrin.h"
 #endif
 
@@ -40,7 +40,9 @@ FP_TYPE calculate_mutual_inductance_near(
     // Variable which will store the result of the main loop
     FP_TYPE M_12 = 0.0;
 
-#ifdef USE_AVX
+#if defined(USE_SSE)
+    __m128d M_12_vec = _mm_set1_pd(0.0);
+#elif defined(USE_AVX)
     __m256d M_12_vec = _mm256_set1_pd(0.0);
 #elif defined(USE_AVX512)
     __m512d M_12_vec = _mm512_set1_pd(0.0);
@@ -115,7 +117,35 @@ FP_TYPE calculate_mutual_inductance_near(
             FP_TYPE save_second_loop_denom_1 = loop_denom_1;
             FP_TYPE save_second_loop_denom_2 = loop_denom_2;
 
-        #ifdef USE_AVX
+        #if defined(USE_SSE)
+            __m128d loop_denom_1_vec = _mm_set1_pd(loop_denom_1);
+            __m128d loop_denom_2_vec = _mm_set1_pd(loop_denom_2);
+
+            __m128d loop_R_1_sub_r_1_vec = _mm_set1_pd(loop_R_1_sub_r_1);
+            __m128d loop_R_2_sub_r_2_vec = _mm_set1_pd(loop_R_2_sub_r_2);
+
+            for (uint32_t n = 0; n < precision.n_terms; n += 2) {
+
+                __m128d loop_L_1_plus_Z_sub_Z_vec = _mm_loadu_pd(&inner_L_1_plus_Z_sub_Z_arr[n]);
+                __m128d inner_loop_denom_1_vec = _mm_loadu_pd(&inner_denom_1_arr[n]);
+                __m128d inner_loop_denom_2_vec = _mm_loadu_pd(&inner_denom_2_arr[n]);
+
+                inner_loop_denom_1_vec = _mm_mul_pd(loop_denom_1_vec, inner_loop_denom_1_vec);
+                inner_loop_denom_2_vec = _mm_mul_pd(loop_denom_2_vec, inner_loop_denom_2_vec);
+
+                __m128d numerator = _mm_mul_pd(
+                    _mm_mul_pd(loop_R_2_sub_r_2_vec, loop_R_1_sub_r_1_vec),
+                    _mm_mul_pd(
+                        loop_L_1_plus_Z_sub_Z_vec,
+                        _mm_sub_pd(inner_loop_denom_1_vec, inner_loop_denom_2_vec)
+                    )
+                );
+
+                __m128d lookup_table_vec = _mm_loadu_pd(&lookup_table_near[l][k][n]);
+
+                M_12_vec = _mm_add_pd(M_12_vec, _mm_mul_pd(numerator, lookup_table_vec));
+            }
+        #elif defined(USE_AVX)
             __m256d loop_denom_1_vec = _mm256_set1_pd(loop_denom_1);
             __m256d loop_denom_2_vec = _mm256_set1_pd(loop_denom_2);
 
@@ -195,10 +225,14 @@ FP_TYPE calculate_mutual_inductance_near(
         loop_denom_2 = save_first_loop_denom_2;
     }
 
-#ifdef USE_AVX
+#if defined(USE_SSE)
+    double temp[2];
+    _mm_storeu_pd(temp, M_12_vec);
+    M_12 += temp[0] + temp[1];
+#elif defined(USE_AVX)
     double temp[4];
     _mm256_storeu_pd(temp, M_12_vec);
-    M_12 = temp[0] + temp[1] + temp[2] + temp[3];
+    M_12 += temp[0] + temp[1] + temp[2] + temp[3];
 #elif defined(USE_AVX512)
     M_12 += _mm512_reduce_add_pd(M_12_vec);
 #endif
@@ -233,7 +267,11 @@ FP_TYPE calculate_mutual_inductance_near_dz(
     // Variable which will store the result of the main loop
     FP_TYPE M_12 = 0.0;
 
-#ifdef USE_AVX
+#if defined(USE_SSE)
+    __m128d M_12_vec = _mm_set1_pd(0.0);
+    __m128d denom_1_vec = _mm_set1_pd(denom_1);
+    __m128d denom_2_vec = _mm_set1_pd(denom_2);
+#elif defined(USE_AVX)
     __m256d M_12_vec = _mm256_set1_pd(0.0);
     __m256d denom_1_vec = _mm256_set1_pd(denom_1);
     __m256d denom_2_vec = _mm256_set1_pd(denom_2);
@@ -314,7 +352,51 @@ FP_TYPE calculate_mutual_inductance_near_dz(
             FP_TYPE save_second_loop_denom_1 = loop_denom_1;
             FP_TYPE save_second_loop_denom_2 = loop_denom_2;
 
-        #ifdef USE_AVX
+        #if defined(USE_SSE)
+            __m128d loop_denom_1_vec = _mm_set1_pd(loop_denom_1);
+            __m128d loop_denom_2_vec = _mm_set1_pd(loop_denom_2);
+
+            __m128d loop_R_1_sub_r_1_vec = _mm_set1_pd(loop_R_1_sub_r_1);
+            __m128d loop_R_2_sub_r_2_vec = _mm_set1_pd(loop_R_2_sub_r_2);
+
+            for (uint32_t n = 0; n < precision.n_terms; n += 2) {
+
+                __m128d loop_L_1_plus_Z_sub_Z_vec = _mm_loadu_pd(&inner_L_1_plus_Z_sub_Z_arr[n]);
+                __m128d loop_L_1_plus_Z_sub_Z_vec_2 = _mm_loadu_pd(&inner_L_1_plus_Z_sub_Z_arr_2[n]);
+
+                __m128d inner_loop_denom_1_vec = _mm_loadu_pd(&inner_denom_1_arr[n]);
+                __m128d inner_loop_denom_2_vec = _mm_loadu_pd(&inner_denom_2_arr[n]);
+
+                inner_loop_denom_1_vec = _mm_mul_pd(loop_denom_1_vec, inner_loop_denom_1_vec);
+                inner_loop_denom_2_vec = _mm_mul_pd(loop_denom_2_vec, inner_loop_denom_2_vec);
+
+                // Mind the endian order
+                __m128d factor = _mm_set_pd(
+                        -(double) (2 * k + 2 * l + n + 2 + 1),
+                        -(double) (2 * k + 2 * l + n + 2 + 0)
+                );
+
+                __m128d first = _mm_mul_pd(loop_L_1_plus_Z_sub_Z_vec_2,
+                                           _mm_sub_pd(inner_loop_denom_1_vec, inner_loop_denom_2_vec)
+                );
+
+                inner_loop_denom_1_vec = _mm_mul_pd(inner_loop_denom_1_vec, denom_1_vec);
+                inner_loop_denom_2_vec = _mm_mul_pd(inner_loop_denom_2_vec, denom_2_vec);
+
+                __m128d second = _mm_mul_pd(
+                        _mm_mul_pd(loop_L_1_plus_Z_sub_Z_vec, factor),
+                        _mm_sub_pd(inner_loop_denom_1_vec, inner_loop_denom_2_vec)
+                );
+
+                __m128d numerator = _mm_mul_pd(
+                        _mm_mul_pd(loop_R_2_sub_r_2_vec, loop_R_1_sub_r_1_vec),
+                        _mm_add_pd(first, second)
+                );
+
+                __m128d lookup_table_vec = _mm_loadu_pd(&lookup_table_near[l][k][n]);
+                M_12_vec = _mm_add_pd(M_12_vec, _mm_mul_pd(numerator, lookup_table_vec));
+            }
+        #elif defined(USE_AVX)
             __m256d loop_denom_1_vec = _mm256_set1_pd(loop_denom_1);
             __m256d loop_denom_2_vec = _mm256_set1_pd(loop_denom_2);
 
@@ -358,7 +440,6 @@ FP_TYPE calculate_mutual_inductance_near_dz(
                 );
 
                 __m256d lookup_table_vec = _mm256_loadu_pd(&lookup_table_near[l][k][n]);
-
                 M_12_vec = _mm256_add_pd(M_12_vec, _mm256_mul_pd(numerator, lookup_table_vec));
             }
         #elif defined(USE_AVX512)
@@ -410,7 +491,6 @@ FP_TYPE calculate_mutual_inductance_near_dz(
                 );
 
                 __m512d lookup_table_vec = _mm512_loadu_pd(&lookup_table_near[l][k][n]);
-
                 M_12_vec = _mm512_add_pd(M_12_vec, _mm512_mul_pd(numerator, lookup_table_vec));
             }
         #else
@@ -443,8 +523,11 @@ FP_TYPE calculate_mutual_inductance_near_dz(
         loop_denom_1 = save_first_loop_denom_1;
         loop_denom_2 = save_first_loop_denom_2;
     }
-
-#ifdef USE_AVX
+#if defined(USE_SSE)
+    double temp[2];
+    _mm_storeu_pd(temp, M_12_vec);
+    M_12 += temp[0] + temp[1];
+#elif defined(USE_AVX)
     double temp[4];
     _mm256_storeu_pd(temp, M_12_vec);
     M_12 += temp[0] + temp[1] + temp[2] + temp[3];

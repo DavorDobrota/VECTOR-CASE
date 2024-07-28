@@ -1,7 +1,9 @@
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "portability-simd-intrinsics"
 
-#include <immintrin.h>
+#if defined(USE_SSE) || defined(USE_AVX) || defined(USE_AVX512)
+#include "immintrin.h"
+#endif
 
 #include "structs.h"
 #include "fast_lookup_tables.h"
@@ -105,7 +107,7 @@ double calculate_mutual_inductance_double_fast(
 
     double M_12 = 0.0;
 
-#ifdef USE_AVX
+#if defined(USE_AVX)
     __m256d M_12_vect = _mm256_set1_pd(0.0);
 
     for (int l = 0; l < 8; ++l) {
@@ -326,7 +328,7 @@ float calculate_mutual_inductance_float_fast(
     return M_12;
 }
 
-#ifdef USE_AVX
+#if defined(USE_AVX)
 float calculate_mutual_inductance_float_fast_avx(
         const float N_1,
         const float L_1,

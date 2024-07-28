@@ -4,6 +4,7 @@
 // Define the floating point type to be used
 #define USING_DOUBLE
 
+//#define USE_SSE
 //#define USE_AVX
 //#define USE_AVX512
 
