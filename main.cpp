@@ -9,21 +9,21 @@
 int main() {
 
     // Input parameters for the problem
-    constexpr FP_TYPE N_1 = 100.0;
-    constexpr FP_TYPE L_1 = 0.1;
-    constexpr FP_TYPE R_1 = 0.2;
-    constexpr FP_TYPE r_1 = 0.1;
+    const FP_TYPE N_1 = 100.0;
+    const FP_TYPE L_1 = 0.1;
+    const FP_TYPE R_1 = 0.2;
+    const FP_TYPE r_1 = 0.1;
 
-    constexpr FP_TYPE N_2 = 100.0;
-    constexpr FP_TYPE L_2 = 0.1;
-    constexpr FP_TYPE R_2 = 0.4;
-    constexpr FP_TYPE r_2 = 0.3;
+    const FP_TYPE N_2 = 100.0;
+    const FP_TYPE L_2 = 0.1;
+    const FP_TYPE R_2 = 0.4;
+    const FP_TYPE r_2 = 0.3;
 
-    constexpr FP_TYPE d = 0.9;
+    const FP_TYPE d = 0.9;
 
     // Data structure to hold the input parameters
-    CoilCalculationData data{N_1, L_1, R_1, r_1, N_2, L_2, R_2, r_2};
-    SumPrecisionData precision{16, 16, 16};
+    const CoilCalculationData data{N_1, L_1, R_1, r_1, N_2, L_2, R_2, r_2};
+    const SumPrecisionData precision{8, 8, 8};
 
     // Calculate the mutual inductance
     FP_TYPE M_12 = calculate_mutual_inductance_far(data, precision, d);

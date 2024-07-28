@@ -196,9 +196,11 @@ FP_TYPE calculate_mutual_inductance_near(
     }
 
 #ifdef USE_AVX
-    M_12 = M_12_vec[0] + M_12_vec[1] + M_12_vec[2] + M_12_vec[3];
+    double temp[4];
+    _mm256_storeu_pd(temp, M_12_vec);
+    M_12 = temp[0] + temp[1] + temp[2] + temp[3];
 #elif defined(USE_AVX512)
-    M_12 = _mm512_reduce_add_pd(M_12_vec);
+    M_12 += _mm512_reduce_add_pd(M_12_vec);
 #endif
 
     M_12 *= 4.0 * local_pi * local_pi * 1e-7 * data.N_1 * data.N_2
@@ -443,18 +445,11 @@ FP_TYPE calculate_mutual_inductance_near_dz(
     }
 
 #ifdef USE_AVX
-    #ifdef USING_DOUBLE
-    M_12 = M_12_vec[0] + M_12_vec[1] + M_12_vec[2] + M_12_vec[3];
-    #else
-    M_12 = M_12_vec[0] + M_12_vec[1] + M_12_vec[2] + M_12_vec[3]
-         + M_12_vec[4] + M_12_vec[5] + M_12_vec[6] + M_12_vec[7];
-    #endif
+    double temp[4];
+    _mm256_storeu_pd(temp, M_12_vec);
+    M_12 += temp[0] + temp[1] + temp[2] + temp[3];
 #elif defined(USE_AVX512)
-    #ifdef USING_DOUBLE
-    M_12 = _mm512_reduce_add_pd(M_12_vec);
-    #else
-    M_12 = _mm512_reduce_add_ps(M_12_vec);
-    #endif
+    M_12 += _mm512_reduce_add_pd(M_12_vec);
 #endif
 
     M_12 *= 4.0 * local_pi * local_pi * 1e-7 * data.N_1 * data.N_2

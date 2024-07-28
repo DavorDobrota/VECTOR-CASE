@@ -292,7 +292,7 @@ int main() {
 
     // Data structure to hold the input parameters
     CoilCalculationData data{N_1, L_1, R_1, r_1, N_2, L_2, R_2, r_2};
-    SumPrecisionData precision{32, 32, 64};
+    SumPrecisionData precision{8, 8, 16};
 
     for (int i = -10; i < 200; i++) {
         // Calculate the mutual inductance
@@ -322,11 +322,11 @@ int main() {
     FP_TYPE volatile value;
 //    float volatile value_float;
     for (int i = 0; i < 10000; ++i) {
-//        value = calculate_mutual_inductance_double_fast_avx(
-//                data.N_1, data.L_1, data.R_1, data.r_1,
-//                data.N_2, data.L_2, data.R_2, data.r_2,
-//                (double) i * 0.0001, 1.0);
-        value = calculate_mutual_inductance_near(data, precision, (FP_TYPE) i * 0.0001f, 1.0);
+        value = calculate_mutual_inductance_double_fast(
+                data.N_1, data.L_1, data.R_1, data.r_1,
+                data.N_2, data.L_2, data.R_2, data.r_2,
+                (double) i * 0.0001, 1.0);
+//        value = calculate_mutual_inductance_near(data, precision, (FP_TYPE) i * 0.0001f, 1.0);
 //        value_float = calculate_mutual_inductance_float_fast_avx(
 //                data.N_1, data.L_1, data.R_1, data.r_1,
 //                data.N_2, data.L_2, data.R_2, data.r_2,
@@ -340,11 +340,11 @@ int main() {
     std::cout << "Fast Time average = " << interval / 10000 << " s" << std::endl;
 
     // Calculate the mutual inductance
-    FP_TYPE M_12 = calculate_mutual_inductance_near(data, precision, d, 4 * data.R_2);
+    FP_TYPE M_12 = calculate_mutual_inductance_near(data, precision, d, 6 * data.R_1);
     double M_12_fast = calculate_mutual_inductance_double_fast(
             data.N_1, data.L_1, data.R_1, data.r_1,
             data.N_2, data.L_2, data.R_2, data.r_2,
-            d, 1.0);
+            d, 6 * data.R_1);
     FP_TYPE M_12_1 = guess_best_inductance_near(data, precision, d, 0.0, 6 * data.R_1, true);
 
     // Print to 16 decimal places
