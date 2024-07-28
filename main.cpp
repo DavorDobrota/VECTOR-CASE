@@ -27,24 +27,24 @@ int main() {
 
     // Calculate the mutual inductance
     FP_TYPE M_12 = calculate_mutual_inductance_far(data, precision, d);
-    FP_TYPE M_12_unoptimized = calculate_mutual_inductance_far_fast(data, precision, d);
+    FP_TYPE M_12_unoptimized = calculate_mutual_inductance_far_unoptimized(data, precision, d);
 //    FP_TYPE M_12_zupan = calculate_mutual_inductance_zupan(data, d, 1, 15);
 
-//    std::chrono::high_resolution_clock::time_point start = std::chrono::high_resolution_clock::now();
-//    FP_TYPE volatile value;
-//    for (int i = 0; i < 10000; ++i) {
-//        value = calculate_mutual_inductance_zupan(data, d, 1, 15);
-//    }
+    std::chrono::high_resolution_clock::time_point start = std::chrono::high_resolution_clock::now();
+    FP_TYPE volatile value;
+    for (int i = 0; i < 10000; ++i) {
+        value = calculate_mutual_inductance_far(data, precision, d);
+    }
 
 //    for (int i = 1; i <= 64; ++i) {
 //        value = calculate_mutual_inductance_zupan(data, d, 1, i);
 //        std::cout << std::setprecision(16) << i << "\t" << value << std::endl;
 //    }
 
-//    double interval = std::chrono::duration_cast<std::chrono::duration<double>>(
-//            std::chrono::high_resolution_clock::now() - start).count();
-//    std::cout << "Value = " << value << std::endl;
-//    std::cout << "Zupan time average = " << interval / 10000 << " s" << std::endl;
+    double interval = std::chrono::duration_cast<std::chrono::duration<double>>(
+            std::chrono::high_resolution_clock::now() - start).count();
+    std::cout << "Value = " << value << std::endl;
+    std::cout << "Time average = " << interval / 10000 << " s" << std::endl;
 
     // Print to 16 decimal places
     std::cout << std::endl;
