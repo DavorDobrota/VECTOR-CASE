@@ -1,3 +1,6 @@
+#ifndef VECTOR_CASE_INDUCTANCE_NAIVE_HPP
+#define VECTOR_CASE_INDUCTANCE_NAIVE_HPP
+
 #include <iostream>
 #include <chrono>
 #include <cmath>
@@ -6,6 +9,7 @@
 #include "factorial_lookup.h"
 
 
+// TODO - fix whatever the bug is here, no idea right now, optimized method works
 double calculate_mutual_inductance_far_unoptimized(
         const CoilCalculationData& data,
         const SumPrecisionData &precision,
@@ -31,7 +35,7 @@ double calculate_mutual_inductance_far_unoptimized(
                                   * std::pow(data.L_1, 2 * n)
                                   * (std::pow(data.R_1, 2 * l + 3) - std::pow(data.r_1, 2 * l + 3))
                                   * (std::pow(data.R_2, 2 * k + 3) - std::pow(data.r_2, 2 * k + 3))
-                                  * (1.0 / std::pow( 0.5 * data.L_1 + d, 2 * n + 2 * l + 2 * k + 2)
+                                  * (1.0 / std::pow(0.5 * data.L_1 + d, 2 * n + 2 * l + 2 * k + 2)
                                      - 1.0 / std::pow(0.5 * data.L_1 + d + data.L_2, 2 * n + 2 * l + 2 * k + 2)
                                     );
 
@@ -178,3 +182,5 @@ double calculate_mutual_inductance_near_unoptimized(
 
     return M_12;
 }
+
+#endif //VECTOR_CASE_INDUCTANCE_NAIVE_HPP

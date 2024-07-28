@@ -131,13 +131,11 @@ FP_TYPE calculate_mutual_inductance_near(
                 inner_loop_denom_1_vec = _mm256_mul_pd(loop_denom_1_vec, inner_loop_denom_1_vec);
                 inner_loop_denom_2_vec = _mm256_mul_pd(loop_denom_2_vec, inner_loop_denom_2_vec);
 
-                __m256d numerator = _mm256_mul_pd(loop_R_2_sub_r_2_vec,
-                    _mm256_mul_pd(loop_L_1_plus_Z_sub_Z_vec,
-                                  _mm256_mul_pd(loop_R_1_sub_r_1_vec,
-                                                _mm256_sub_pd(inner_loop_denom_1_vec,
-                                                              inner_loop_denom_2_vec
-                                                              )
-                                  )
+                __m256d numerator = _mm256_mul_pd(
+                    _mm256_mul_pd(loop_R_2_sub_r_2_vec, loop_R_1_sub_r_1_vec),
+                    _mm256_mul_pd(
+                        loop_L_1_plus_Z_sub_Z_vec,
+                        _mm256_sub_pd(inner_loop_denom_1_vec, inner_loop_denom_2_vec)
                     )
                 );
 
@@ -161,13 +159,11 @@ FP_TYPE calculate_mutual_inductance_near(
                 inner_loop_denom_1_vec = _mm512_mul_pd(loop_denom_1_vec, inner_loop_denom_1_vec);
                 inner_loop_denom_2_vec = _mm512_mul_pd(loop_denom_2_vec, inner_loop_denom_2_vec);
 
-                __m512d numerator = _mm512_mul_pd(loop_R_2_sub_r_2_vec,
-                    _mm512_mul_pd(loop_L_1_plus_Z_sub_Z_vec,
-                                  _mm512_mul_pd(loop_R_1_sub_r_1_vec,
-                                                _mm512_sub_pd(inner_loop_denom_1_vec,
-                                                              inner_loop_denom_2_vec
-                                                              )
-                                  )
+                __m512d numerator = _mm512_mul_pd(
+                    _mm512_mul_pd(loop_R_2_sub_r_2_vec, loop_R_1_sub_r_1_vec),
+                    _mm512_mul_pd(
+                        loop_L_1_plus_Z_sub_Z_vec,
+                        _mm512_sub_pd(inner_loop_denom_1_vec,inner_loop_denom_2_vec)
                     )
                 );
 
@@ -187,9 +183,9 @@ FP_TYPE calculate_mutual_inductance_near(
                                     * loop_R_2_sub_r_2
                                     * (inner_loop_denom_1 - inner_loop_denom_2);
 
-                M_12 += numerator * lookup_table_near[l][k][n];
+                M_12 += lookup_table_near[l][k][n] * numerator;
             }
-        #endif
+        #endif // USE_AVX
 
             loop_denom_1 = save_second_loop_denom_1;
             loop_denom_2 = save_second_loop_denom_2;
@@ -354,8 +350,9 @@ FP_TYPE calculate_mutual_inductance_near_dz(
                     _mm256_sub_pd(inner_loop_denom_1_vec, inner_loop_denom_2_vec)
                 );
 
-                __m256d numerator = _mm256_mul_pd(loop_R_2_sub_r_2_vec,
-                    _mm256_mul_pd(loop_R_1_sub_r_1_vec,_mm256_add_pd(first, second))
+                __m256d numerator = _mm256_mul_pd(
+                    _mm256_mul_pd(loop_R_2_sub_r_2_vec, loop_R_1_sub_r_1_vec),
+                    _mm256_add_pd(first, second)
                 );
 
                 __m256d lookup_table_vec = _mm256_loadu_pd(&lookup_table_near[l][k][n]);
@@ -406,8 +403,8 @@ FP_TYPE calculate_mutual_inductance_near_dz(
                 );
 
                 __m512d numerator = _mm512_mul_pd(
-                    loop_R_2_sub_r_2_vec,
-                    _mm512_mul_pd(loop_R_1_sub_r_1_vec,_mm512_add_pd(first, second))
+                    _mm512_mul_pd(loop_R_2_sub_r_2_vec, loop_R_1_sub_r_1_vec),
+                    _mm512_add_pd(first, second)
                 );
 
                 __m512d lookup_table_vec = _mm512_loadu_pd(&lookup_table_near[l][k][n]);
@@ -466,76 +463,6 @@ FP_TYPE calculate_mutual_inductance_near_dz(
     return M_12;
 }
 
-
-//FP_TYPE guess_best_inductance_near(
-//        const CoilCalculationData& data,
-//        const SumPrecisionData &precision,
-//        const FP_TYPE d,
-//        const FP_TYPE Z_start,
-//        const FP_TYPE Z_end,
-//        const FP_TYPE tolerance = 1e-5,
-//        bool verbose = false
-//){
-//    std::chrono::high_resolution_clock::time_point begin_time;
-//
-//    if (verbose) {
-//        begin_time = std::chrono::high_resolution_clock::now();
-//    }
-//
-//    const FP_TYPE inv_phi = (std::sqrt(5) - 1) / 2;  // 1/phi
-//    const FP_TYPE inv_phi_sq = (3 - std::sqrt(5)) / 2;  // 1/phi^2
-//    FP_TYPE Z_low = Z_start;
-//    FP_TYPE Z_high = Z_end;
-//
-//    FP_TYPE h = Z_high - Z_low;
-//    if (h <= 0) {
-//        throw std::invalid_argument("Z_end must be greater than Z_start");
-//    }
-//
-//    FP_TYPE Z1 = Z_low + inv_phi_sq * h;
-//    FP_TYPE Z2 = Z_low + inv_phi * h;
-//
-//    FP_TYPE F1 = calculate_mutual_inductance_near(data, precision, d, Z1);
-//    FP_TYPE F2 = calculate_mutual_inductance_near(data, precision, d, Z2);
-//
-//    uint32_t counter = 2;
-//
-//    while (h > 0.1 * tolerance) {
-//        if (F1 < F2) {
-//            Z_high = Z2;
-//            Z2 = Z1;
-//            F2 = F1;
-//            h = inv_phi * h;
-//            Z1 = Z_low + inv_phi_sq * h;
-//
-//            F1 = calculate_mutual_inductance_near(data, precision, d, Z1);
-//        } else {
-//            Z_low = Z1;
-//            Z1 = Z2;
-//            F1 = F2;
-//            h = inv_phi * h;
-//            Z2 = Z_low + inv_phi * h;
-//
-//            F2 = calculate_mutual_inductance_near(data, precision, d, Z2);
-//        }
-//        counter++;
-//    }
-//
-//    FP_TYPE best_Z = (Z_low + Z_high) / 2;
-//
-//    FP_TYPE best_value = calculate_mutual_inductance_near(data, precision, d, best_Z);
-//
-//    if (verbose) {
-//        auto end_time = std::chrono::high_resolution_clock::now();
-//        double interval = std::chrono::duration_cast<std::chrono::duration<double>>(end_time - begin_time).count();
-//        std::cout << "Optimized with search time =  " << interval << " s" << std::endl;
-//        std::cout << "Number of iterations =        " << counter << std::endl;
-//        std::cout << "Time per iteration =          " << interval / counter << " s" << std::endl;
-//        std::cout << "Best mutual inductance at Z = " << best_Z << " is " << best_value << std::endl;
-//    }
-//
-//    return best_value;
-//}
 
 FP_TYPE guess_best_inductance_near(
         const CoilCalculationData& data,
