@@ -1,6 +1,3 @@
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "portability-simd-intrinsics"
-
 #ifndef VECTOR_CASE_INDUCTANCE_NEAR_H
 #define VECTOR_CASE_INDUCTANCE_NEAR_H
 
@@ -658,5 +655,3 @@ void benchmark_mutual_inductance_near(const SumPrecisionData precision, const ui
 
 
 #endif //VECTOR_CASE_INDUCTANCE_NEAR_H
-
-#pragma clang diagnostic pop

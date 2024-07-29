@@ -1,6 +1,3 @@
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "portability-simd-intrinsics"
-
 #ifndef VECTOR_CASE_INDUCTANCE_FAST_H
 #define VECTOR_CASE_INDUCTANCE_FAST_H
 
@@ -465,5 +462,3 @@ float calculate_mutual_inductance_float_fast_avx(
 #endif
 
 #endif //VECTOR_CASE_INDUCTANCE_FAST_H
-
-#pragma clang diagnostic pop

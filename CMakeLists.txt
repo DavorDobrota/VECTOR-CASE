@@ -26,5 +26,6 @@ add_executable(with_z
         inductance_remainder_bound.h
         with_z.c)
 
+# Link the math library
 target_link_libraries(with_z m)
 target_link_libraries(vector_case m)
