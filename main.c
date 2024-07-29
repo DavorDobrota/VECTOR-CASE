@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <time.h>
 
 #include "inductance_naive.h"
 #include "inductance_far.h"

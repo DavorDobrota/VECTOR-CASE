@@ -2,7 +2,6 @@
 #pragma ide diagnostic ignored "portability-simd-intrinsics"
 
 #include <stdio.h>
-#include <time.h>
 
 #include "structs.h"
 
@@ -15,17 +14,17 @@ int main() {
     // Input parameters for the problem
     CoilCalculationData data;
 
-    data.r_1 = 0.1;
-    data.R_1 = 0.2;
-    data.L_1 = 0.1;
-    data.N_1 = 100.0;
+    data.r_1 = 0.5;
+    data.R_1 = 1.5;
+    data.L_1 = 1.0;
+    data.N_1 = 1.0;
 
-    data.r_2 = 0.3;
-    data.R_2 = 0.4;
-    data.L_2 = 0.1;
-    data.N_2 = 100.0;
+    data.r_2 = 0.5;
+    data.R_2 = 1.5;
+    data.L_2 = 1.0;
+    data.N_2 = 1.0;
 
-    const FP_TYPE d = 0.1;
+    const FP_TYPE d = 1.0;
 
     // Data structure to hold the input parameters
 

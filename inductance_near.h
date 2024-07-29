@@ -611,7 +611,7 @@ FP_TYPE guess_best_inductance_near(
         printf("Optimized with search time =    %g s\n", interval);
         printf("Number of iterations =          %u\n", counter);
         printf("Time per iteration =            %g s\n", interval / (double) counter);
-        printf("Best mutual inductance at   Z = %.15g is %.15g\n", best_Z, best_value);
+        printf("Best mutual inductance at   Z = %.16g is %.16g\n", best_Z, best_value);
     }
 
     return best_value;
