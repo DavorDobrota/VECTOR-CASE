@@ -2,6 +2,8 @@
 #define VECTOR_CASE_FAR_INDUCTANCE_HPP
 
 #include <math.h>
+#include <stdio.h>
+#include <time.h>
 
 #include "structs.h"
 #include "sum_lookup_table_far.h"
@@ -230,7 +232,7 @@ double calculate_mutual_inductance_far(
 #endif
 
     M_12 *= (FP_TYPE) (4.0e-7) * local_pi * local_pi * data.N_1 * data.N_2
-            / (data.L_2 * (data.R_1 - data.r_1) * (data.R_2 - data.r_2));
+          / (data.L_2 * (data.R_1 - data.r_1) * (data.R_2 - data.r_2));
 
     return M_12;
 }
