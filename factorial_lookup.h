@@ -5,7 +5,7 @@
 
 #define MAX_FACTORIAL 170
 
-static const FP_TYPE factorial_array[MAX_FACTORIAL + 1] {
+static const FP_TYPE factorial_array[MAX_FACTORIAL + 1] = {
     1.00000000000000000000e+0,
     1.00000000000000000000e+0,
     2.00000000000000000000e+0,

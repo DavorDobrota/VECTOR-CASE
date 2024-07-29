@@ -1,12 +1,13 @@
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "portability-simd-intrinsics"
 
-#ifndef VECTOR_CASE_INDUCTANCE_NEAR_HPP
-#define VECTOR_CASE_INDUCTANCE_NEAR_HPP
+#ifndef VECTOR_CASE_INDUCTANCE_NEAR_H
+#define VECTOR_CASE_INDUCTANCE_NEAR_H
 
-#include <iostream>
-#include <chrono>
-#include <cmath>
+#include <stdio.h>
+#include <time.h>
+#include <math.h>
+#include <stdbool.h>
 
 #include "structs.h"
 #include "sum_lookup_table_near.h"
@@ -17,8 +18,8 @@
 
 
 FP_TYPE calculate_mutual_inductance_near(
-        const CoilCalculationData& data,
-        const SumPrecisionData &precision,
+        const CoilCalculationData data,
+        const SumPrecisionData precision,
         const FP_TYPE d,
         const FP_TYPE Z
 ) {
@@ -49,14 +50,14 @@ FP_TYPE calculate_mutual_inductance_near(
 #endif
 
     // Inner loop lookup table for efficient vectorization
-    FP_TYPE inner_denom_1_arr[MAX_TERMS_NEAR]{};
-    FP_TYPE inner_denom_2_arr[MAX_TERMS_NEAR]{};
-    FP_TYPE inner_L_1_plus_Z_sub_Z_arr[MAX_TERMS_NEAR]{};
+    FP_TYPE inner_denom_1_arr[MAX_TERMS_NEAR] = {0.0};
+    FP_TYPE inner_denom_2_arr[MAX_TERMS_NEAR] = {0.0};
+    FP_TYPE inner_L_1_plus_Z_sub_Z_arr[MAX_TERMS_NEAR] = {0.0};
 
-    auto temp_denom_1 = (FP_TYPE) 1.0;
-    auto temp_denom_2 = (FP_TYPE) 1.0;
-    auto temp_L_1_plus_Z = (FP_TYPE) L_1_plus_Z;
-    auto temp_Z = (FP_TYPE) Z;
+    FP_TYPE temp_denom_1 = 1.0;
+    FP_TYPE temp_denom_2 = 1.0;
+    FP_TYPE temp_L_1_plus_Z = L_1_plus_Z;
+    FP_TYPE temp_Z = Z;
 
     for (uint32_t n = 0; n < precision.n_terms; ++n) {
         if (n > 0) {
@@ -244,14 +245,14 @@ FP_TYPE calculate_mutual_inductance_near(
 }
 
 FP_TYPE calculate_mutual_inductance_near_dz(
-        const CoilCalculationData& data,
-        const SumPrecisionData &precision,
+        const CoilCalculationData data,
+        const SumPrecisionData precision,
         const FP_TYPE d,
         const FP_TYPE Z
 ) {
     // Useful calculations that can be performed at compile time, before the main loop
-    const FP_TYPE denom_1 = (FP_TYPE) 1.0 / (Z + data.L_1 + d);
-    const FP_TYPE denom_2 = (FP_TYPE) 1.0 / (Z + data.L_1 + data.L_2 + d);
+    const FP_TYPE denom_1 = 1.0 / (Z + data.L_1 + d);
+    const FP_TYPE denom_2 = 1.0 / (Z + data.L_1 + data.L_2 + d);
 
     const FP_TYPE R_1_sq = data.R_1 * data.R_1;
     const FP_TYPE r_1_sq = data.r_1 * data.r_1;
@@ -282,15 +283,15 @@ FP_TYPE calculate_mutual_inductance_near_dz(
 #endif
 
     // Inner loop lookup table for efficient vectorization
-    FP_TYPE inner_denom_1_arr[MAX_TERMS_NEAR]{};
-    FP_TYPE inner_denom_2_arr[MAX_TERMS_NEAR]{};
-    FP_TYPE inner_L_1_plus_Z_sub_Z_arr[MAX_TERMS_NEAR]{};
-    FP_TYPE inner_L_1_plus_Z_sub_Z_arr_2[MAX_TERMS_NEAR]{};
+    FP_TYPE inner_denom_1_arr[MAX_TERMS_NEAR] = {0.0};
+    FP_TYPE inner_denom_2_arr[MAX_TERMS_NEAR] = {0.0};
+    FP_TYPE inner_L_1_plus_Z_sub_Z_arr[MAX_TERMS_NEAR] = {0.0};
+    FP_TYPE inner_L_1_plus_Z_sub_Z_arr_2[MAX_TERMS_NEAR] = {0.0};
 
-    auto temp_denom_1 = (FP_TYPE) 1.0;
-    auto temp_denom_2 = (FP_TYPE) 1.0;
-    auto temp_L_1_plus_Z = (FP_TYPE) 1.0;
-    auto temp_Z = (FP_TYPE) 1.0;
+    FP_TYPE temp_denom_1 = 1.0;
+    FP_TYPE temp_denom_2 = 1.0;
+    FP_TYPE temp_L_1_plus_Z = 1.0;
+    FP_TYPE temp_Z = 1.0;
 
     for (uint32_t n = 0; n < precision.n_terms; ++n) {
         if (n > 0) {
@@ -543,37 +544,38 @@ FP_TYPE calculate_mutual_inductance_near_dz(
 
 
 FP_TYPE guess_best_inductance_near(
-        const CoilCalculationData& data,
-        const SumPrecisionData &precision,
+        const CoilCalculationData data,
+        const SumPrecisionData precision,
         const FP_TYPE d,
         const FP_TYPE Z_start,
         const FP_TYPE Z_end,
-        bool verbose = false,
-        const FP_TYPE r_tol = 1e-5
+        bool verbose,
+        const FP_TYPE r_tol
 ){
-    std::chrono::high_resolution_clock::time_point begin_time;
+    struct timespec start_time;
 
     if (verbose) {
-        begin_time = std::chrono::high_resolution_clock::now();
+        timespec_get(&start_time, TIME_UTC);
     }
 
-    FP_TYPE characteristic_length = std::max(data.R_1, data.R_2);
+    FP_TYPE characteristic_length = data.R_1 > data.R_2 ? data.R_1 : data.R_2;
 
-    const FP_TYPE inv_phi = (std::sqrt(5.0) - 1.0) / 2.0;  // 1/phi
-    const FP_TYPE inv_phi_sq = (3.0 - std::sqrt(5.0)) / 2.0;  // 1/phi^2
+    const FP_TYPE inv_phi = (sqrt(5.0) - 1.0) / 2.0;  // 1/phi
+    const FP_TYPE inv_phi_sq = (3.0 - sqrt(5.0)) / 2.0;  // 1/phi^2
     FP_TYPE Z_low = Z_start;
     FP_TYPE Z_high = Z_end;
 
     FP_TYPE h = Z_high - Z_low;
     if (h <= 0) {
-        throw std::invalid_argument("Z_end must be greater than Z_start");
+        fprintf(stderr, "Z_start must be less than Z_end\n");
+        return -1.0;
     }
 
     FP_TYPE Z1 = Z_low + inv_phi_sq * h;
     FP_TYPE Z2 = Z_low + inv_phi * h;
 
-    FP_TYPE F1 = std::abs(calculate_mutual_inductance_near_dz(data, precision, d, Z1));
-    FP_TYPE F2 = std::abs(calculate_mutual_inductance_near_dz(data, precision, d, Z2));
+    FP_TYPE F1 = fabs(calculate_mutual_inductance_near_dz(data, precision, d, Z1));
+    FP_TYPE F2 = fabs(calculate_mutual_inductance_near_dz(data, precision, d, Z2));
 
     uint32_t counter = 2;
 
@@ -586,14 +588,14 @@ FP_TYPE guess_best_inductance_near(
             Z1 = Z_low + inv_phi_sq * h;
 
             F2 = F1;
-            F1 = std::abs(calculate_mutual_inductance_near_dz(data, precision, d, Z1));
+            F1 = fabs(calculate_mutual_inductance_near_dz(data, precision, d, Z1));
         } else {
             Z_low = Z1;
             Z1 = Z2;
             Z2 = Z_low + inv_phi * h;
 
             F1 = F2;
-            F2 = std::abs(calculate_mutual_inductance_near_dz(data, precision, d, Z2));
+            F2 = fabs(calculate_mutual_inductance_near_dz(data, precision, d, Z2));
         }
         counter++;
     }
@@ -603,18 +605,58 @@ FP_TYPE guess_best_inductance_near(
     FP_TYPE best_value = calculate_mutual_inductance_near(data, precision, d, best_Z);
 
     if (verbose) {
-        auto end_time = std::chrono::high_resolution_clock::now();
-        double interval = std::chrono::duration_cast<std::chrono::duration<double>>(end_time - begin_time).count();
-        std::cout << "Optimized with search time =  " << interval << " s" << std::endl;
-        std::cout << "Number of iterations =        " << counter << std::endl;
-        std::cout << "Time per iteration =          " << interval / counter << " s" << std::endl;
-        std::cout << "Best mutual inductance at Z = " << best_Z << " is " << best_value << std::endl;
+        struct timespec end_time;
+        timespec_get(&end_time, TIME_UTC);
+
+        double interval = (double) (end_time.tv_sec - start_time.tv_sec)
+                        + (double) (end_time.tv_nsec - start_time.tv_nsec) / 1e9;
+
+        printf("Optimized with search time =    %g s\n", interval);
+        printf("Number of iterations =          %u\n", counter);
+        printf("Time per iteration =            %g s\n", interval / (double) counter);
+        printf("Best mutual inductance at   Z = %.15g is %.15g\n", best_Z, best_value);
     }
 
     return best_value;
 }
 
+void benchmark_mutual_inductance_near(const SumPrecisionData precision, const uint32_t n_repeats) {
+    struct timespec start_time;
+    struct timespec end_time;
 
-#endif //VECTOR_CASE_INDUCTANCE_NEAR_HPP
+    CoilCalculationData data = {
+        .R_1 = 0.1,
+        .r_1 = 0.05,
+        .N_1 = 10,
+        .L_1 = 0.05,
+        .R_2 = 0.1,
+        .r_2 = 0.05,
+        .N_2 = 10,
+        .L_2 = 0.05
+    };
+
+    // Volatile to prevent the compiler optimizing out the for loop
+    volatile FP_TYPE result;
+
+    timespec_get(&start_time, TIME_UTC);
+
+    for (uint32_t i = 0; i < n_repeats; ++i) {
+        result = calculate_mutual_inductance_near(data, precision, (FP_TYPE) i * 0.0001, 1.0);
+    }
+
+    timespec_get(&end_time, TIME_UTC);
+
+    double interval = (double) (end_time.tv_sec - start_time.tv_sec)
+                    + (double) (end_time.tv_nsec - start_time.tv_nsec) * 1e-9;
+
+    printf("\nBenchmarked mutual inductance near with %u repeats\n", n_repeats);
+    printf("Precision: L = %u, K = %u, N = %u\n", precision.l_terms, precision.k_terms, precision.n_terms);
+    printf("Elapsed time =          %g s\n", interval);
+    printf("Time per iteration =    %g s\n", interval / (double) n_repeats);
+    printf("Result (printed to prevent compiler optimization) = %.15g\n\n", result);
+}
+
+
+#endif //VECTOR_CASE_INDUCTANCE_NEAR_H
 
 #pragma clang diagnostic pop

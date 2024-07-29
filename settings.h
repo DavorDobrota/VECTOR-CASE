@@ -5,7 +5,7 @@
 #define USING_DOUBLE
 
 //#define USE_SSE
-//#define USE_AVX
+#define USE_AVX
 //#define USE_AVX512
 
 // For now just double precision is supported because float

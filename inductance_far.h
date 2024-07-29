@@ -3,9 +3,7 @@
 #ifndef VECTOR_CASE_FAR_INDUCTANCE_HPP
 #define VECTOR_CASE_FAR_INDUCTANCE_HPP
 
-#include <iostream>
-#include <chrono>
-#include <cmath>
+#include <math.h>
 
 #include "structs.h"
 #include "sum_lookup_table_far.h"
@@ -16,14 +14,14 @@
 
 
 double calculate_mutual_inductance_far(
-        const CoilCalculationData& data,
-        const SumPrecisionData &precision,
+        const CoilCalculationData data,
+        const SumPrecisionData precision,
         const FP_TYPE d
 ) {
-    if (d + 0.5 * data.L_1 <= std::max(data.R_1, data.R_2))
-        throw std::invalid_argument(
-            "The distance d is too small, the method will not converge"
-        );
+    if (d + 0.5 * data.L_1 <= (data.R_1 > data.R_2 ? data.R_1 : data.R_2)) {
+        fprintf(stderr, "Error: The distance d is too small, the method will not converge.\n");
+        return -1.0;
+    }
 
     // Useful calculations that can be performed at compile time, before the main loop
     const FP_TYPE denom_1 = (FP_TYPE) (1.0) / ((FP_TYPE) 0.5 * data.L_1 + d);
@@ -51,13 +49,13 @@ double calculate_mutual_inductance_far(
 #endif
 
     // Inner loop lookup table for efficient vectorization
-    FP_TYPE inner_denom_1_arr[MAX_TERMS_FAR]{};
-    FP_TYPE inner_denom_2_arr[MAX_TERMS_FAR]{};
-    FP_TYPE inner_L_1_arr[MAX_TERMS_FAR]{};
+    FP_TYPE inner_denom_1_arr[MAX_TERMS_FAR] = {0.0};
+    FP_TYPE inner_denom_2_arr[MAX_TERMS_FAR] = {0.0};
+    FP_TYPE inner_L_1_arr[MAX_TERMS_FAR] = {0.0};
 
-    auto temp_denom_1 = (FP_TYPE) 1.0;
-    auto temp_denom_2 = (FP_TYPE) 1.0;
-    auto temp_L_1_plus_Z = (FP_TYPE) 1.0;
+    FP_TYPE temp_denom_1 = 1.0;
+    FP_TYPE temp_denom_2 = 1.0;
+    FP_TYPE temp_L_1_plus_Z = 1.0;
 
     for (uint32_t n = 0; n < precision.n_terms; ++n) {
         if (n > 0) {
@@ -237,6 +235,42 @@ double calculate_mutual_inductance_far(
             / (data.L_2 * (data.R_1 - data.r_1) * (data.R_2 - data.r_2));
 
     return M_12;
+}
+
+void benchmark_mutual_inductance_far(const SumPrecisionData precision, const uint32_t n_repeats) {
+    struct timespec start_time;
+    struct timespec end_time;
+
+    CoilCalculationData data = {
+            .R_1 = 0.1,
+            .r_1 = 0.05,
+            .N_1 = 10,
+            .L_1 = 0.05,
+            .R_2 = 0.1,
+            .r_2 = 0.05,
+            .N_2 = 10,
+            .L_2 = 0.05
+    };
+
+    // Volatile to prevent the compiler optimizing out the for loop
+    volatile FP_TYPE result;
+
+    timespec_get(&start_time, TIME_UTC);
+
+    for (uint32_t i = 0; i < n_repeats; ++i) {
+        result = calculate_mutual_inductance_far(data, precision, 0.1 + (FP_TYPE) i * 0.0001);
+    }
+
+    timespec_get(&end_time, TIME_UTC);
+
+    double interval = (double) (end_time.tv_sec - start_time.tv_sec)
+                      + (double) (end_time.tv_nsec - start_time.tv_nsec) * 1e-9;
+
+    printf("\nBenchmarked mutual inductance near with %u repeats\n", n_repeats);
+    printf("Precision: L = %u, K = %u, N = %u\n", precision.l_terms, precision.k_terms, precision.n_terms);
+    printf("Elapsed time =          %g s\n", interval);
+    printf("Time per iteration =    %g s\n", interval / (double) n_repeats);
+    printf("Result (printed to prevent compiler optimization) = %.15g\n\n", result);
 }
 
 #endif //VECTOR_CASE_FAR_INDUCTANCE_HPP

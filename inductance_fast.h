@@ -1,6 +1,9 @@
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "portability-simd-intrinsics"
 
+#ifndef VECTOR_CASE_INDUCTANCE_FAST_H
+#define VECTOR_CASE_INDUCTANCE_FAST_H
+
 #if defined(USE_SSE) || defined(USE_AVX) || defined(USE_AVX512)
 #include "immintrin.h"
 #endif
@@ -12,7 +15,7 @@ const double local_pi_double = 3.14159265358979323846;
 const float local_pi_float = 3.14159265358979323846f;
 
 
-double calculate_mutual_inductance_double_fast(
+double calculate_mutual_inductance_near_float(
         const double N_1,
         const double L_1,
         const double R_1,
@@ -278,10 +281,10 @@ float calculate_mutual_inductance_float_fast(
     float inner_denom_1_arr[8];
     float inner_denom_2_arr[8];
 
-    float temp_denom_1 = 1.0;
-    float temp_denom_2 = 1.0;
-    float temp_inner_denom_1 = 1.0;
-    float temp_inner_denom_2 = 1.0;
+    float temp_denom_1 = 1.0f;
+    float temp_denom_2 = 1.0f;
+    float temp_inner_denom_1 = 1.0f;
+    float temp_inner_denom_2 = 1.0f;
 
     denom_1_arr[0] = temp_denom_1;
     denom_2_arr[0] = temp_denom_2;
@@ -460,5 +463,7 @@ float calculate_mutual_inductance_float_fast_avx(
     return M_12;
 }
 #endif
+
+#endif //VECTOR_CASE_INDUCTANCE_FAST_H
 
 #pragma clang diagnostic pop
