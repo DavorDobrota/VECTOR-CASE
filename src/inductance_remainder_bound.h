@@ -308,7 +308,7 @@ FP_TYPE calculate_inductance_remainder_unoptimized(
 
         double interval = (double) (end_time.tv_sec - start_time.tv_sec)
                         + (double) (end_time.tv_nsec - start_time.tv_nsec) * 1e-9;
-        printf("Time = %f s\n", interval);
+        printf("Remainder Time = %f s\n", interval);
     }
 
     return r;
@@ -357,7 +357,7 @@ FP_TYPE calculate_inductance_remainder(
     FP_TYPE denom_second_1_sq = denom_second_1 * denom_second_1;
     FP_TYPE denom_second_2_sq = denom_second_2 * denom_second_2;
 
-    FP_TYPE abs_Z = abs(Z);
+    FP_TYPE abs_Z = fabs(Z);
     FP_TYPE L_1_plus_Z = data.L_1 + Z;
 
     FP_TYPE temp_R_1 = R_1_sq * data.R_1;

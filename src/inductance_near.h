@@ -13,7 +13,21 @@
 #include "immintrin.h"
 #endif
 
-
+/**
+ * @brief Calculate the mutual inductance between two coils which are sufficiently close that
+ * the choice of Z is not obvious.
+ *
+ * This function calculates the mutual inductance between two coils using a triple series expansion
+ * implemented with nested loops designed to reuse calculations and minimize the number of
+ * multiplications. Definitions in settings.h can be used to enable vectorized operations
+ * (if available).
+ *
+ * @param data The coil calculation data containing the physical properties of the coils.
+ * @param precision The precision data specifying the number of terms in the series expansion.
+ * @param d The distance between the coils.
+ * @param Z The axial distance between the coils.
+ * @return The calculated mutual inductance.
+ */
 FP_TYPE calculate_mutual_inductance_near(
         const CoilCalculationData data,
         const SumPrecisionData precision,
@@ -500,7 +514,7 @@ FP_TYPE calculate_mutual_inductance_near_dz(
 
                 FP_TYPE inner_loop_denom_1_2 = inner_loop_denom_1_1 * denom_1;
                 FP_TYPE inner_loop_denom_2_2 = inner_loop_denom_2_1 * denom_2;
-                auto factor = -(FP_TYPE) (2 * k + 2 * l + n + 2);
+                FP_TYPE factor = -(FP_TYPE) (2 * k + 2 * l + n + 2);
 
                 FP_TYPE numerator = loop_R_1_sub_r_1
                                     * loop_R_2_sub_r_2
