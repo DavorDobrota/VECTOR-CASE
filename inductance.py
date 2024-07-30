@@ -206,5 +206,5 @@ if __name__ == '__main__':
     data = CoilCalculationData(100, 0.1, 0.2, 0.1, 100, 0.1, 0.4, 0.3)
     d = 0.3
     Z = 1.2
-    result = calculate_mutual_inductance_unoptimized(data, d, Z, timing=True)
+    result = calculate_mutual_inductance(data, d, Z, timing=True)
     print(result)

@@ -8,23 +8,23 @@ int main() {
     CoilCalculationData data;
 
     // Input parameters for the problem
-    data.r_1 = 0.1;
-    data.R_1 = 0.2;
-    data.L_1 = 0.1;
+    data.r_1 = 1.2;
+    data.R_1 = 1.25;
+    data.L_1 = 0.05;
     data.N_1 = 100.0;
 
-    data.r_2 = 0.3;
-    data.R_2 = 0.4;
-    data.L_2 = 0.1;
+    data.r_2 = 0.05;
+    data.R_2 = 0.1;
+    data.L_2 = 0.05;
     data.N_2 = 100.0;
 
-    const FP_TYPE d = 0.9;
+    const FP_TYPE d = 3.0;
 
     // Precision of the sum
     SumPrecisionData precision;
-    precision.k_terms = 32;
-    precision.l_terms = 32;
-    precision.n_terms = 32;
+    precision.k_terms = 12;
+    precision.l_terms = 12;
+    precision.n_terms = 12;
 
     // Calculate the mutual inductance
     FP_TYPE M_12 = calculate_mutual_inductance_far(data, precision, d);
