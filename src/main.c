@@ -20,7 +20,7 @@ int main() {
     data.L_2 = 0.05;
     data.N_2 = 100.0;
 
-    const FP_TYPE d = 1.225;
+    const FP_TYPE d = 2.0;
 
     // Precision of the sum
     SumPrecisionData precision;
