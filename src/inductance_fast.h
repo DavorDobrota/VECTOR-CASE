@@ -1,7 +1,9 @@
 #ifndef VECTOR_CASE_INDUCTANCE_FAST_H
 #define VECTOR_CASE_INDUCTANCE_FAST_H
 
-#if defined(USE_SSE) || defined(USE_AVX) || defined(USE_AVX512)
+#include "settings.h"
+
+#if defined(USE_AVX) || defined(USE_AVX512)
 #include "immintrin.h"
 #endif
 

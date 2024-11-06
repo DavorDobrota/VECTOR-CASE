@@ -570,6 +570,7 @@ FP_TYPE guess_best_inductance_near(
     }
 
     FP_TYPE characteristic_length = data.R_1 > data.R_2 ? data.R_1 : data.R_2;
+    characteristic_length = characteristic_length > data.L_1 ? characteristic_length : data.L_1;
 
     const FP_TYPE inv_phi = (sqrt(5.0) - 1.0) / 2.0;  // 1/phi
     const FP_TYPE inv_phi_sq = (3.0 - sqrt(5.0)) / 2.0;  // 1/phi^2

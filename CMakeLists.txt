@@ -20,6 +20,7 @@ set(SOURCE_FILES
     src/sum_lookup_table_near.h
     src/sum_lookup_table_far.h
 
+    src/inductance.h
     src/inductance_naive.h
     src/inductance_fast.h
     src/inductance_far.h
@@ -29,6 +30,7 @@ set(SOURCE_FILES
 )
 
 add_executable(vector_case_exec ${SOURCE_FILES} src/main.c)
+add_executable(vector_case_test src/inductance.h src/test.c)
 
 add_library(vector_case SHARED ${SOURCE_FILES})
 set_target_properties(vector_case PROPERTIES LINKER_LANGUAGE C)
@@ -37,4 +39,5 @@ set_target_properties(vector_case PROPERTIES LINKER_LANGUAGE C)
 if (UNIX)
     target_link_libraries(vector_case m)
     target_link_libraries(vector_case_exec m)
+    target_link_libraries(vector_case_test m)
 endif()
