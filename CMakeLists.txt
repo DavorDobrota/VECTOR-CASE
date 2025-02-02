@@ -36,6 +36,6 @@ set_target_properties(vector_case PROPERTIES LINKER_LANGUAGE C)
 
 # Link the math library
 if (UNIX)
-    target_link_libraries(vector_case m)
+    target_link_libraries(vector_case_exec m)
     target_link_libraries(vector_case_test m)
 endif()
