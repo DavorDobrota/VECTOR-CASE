@@ -9,17 +9,17 @@ int main() {
     CoilCalculationData data;
 
     // Input parameters for the problem
-    data.r_1 = 0.1;
-    data.R_1 = 0.2;
-    data.L_1 = 0.1;
+    data.r_1 = 1.0;
+    data.R_1 = 2.0;
+    data.L_1 = 1.0;
     data.N_1 = 100.0;
 
-    data.r_2 = 0.3;
-    data.R_2 = 0.4;
-    data.L_2 = 0.1;
+    data.r_2 = 1.5;
+    data.R_2 = 4.0;
+    data.L_2 = 1.0;
     data.N_2 = 100.0;
 
-    const FP_TYPE d = 0.1;
+    const FP_TYPE d = 4e-6;
 
     // Precision of the sum
     SumPrecisionData precision;
@@ -55,9 +55,9 @@ int main() {
 
     // Data structure to hold the input parameters
 
-    precision.k_terms = 16;
-    precision.l_terms = 16;
-    precision.n_terms = 16;
+    precision.k_terms = 32;
+    precision.l_terms = 32;
+    precision.n_terms = 64;
 
     for (int i = -10; i < 150; i++) {
         FP_TYPE M_12 = calculate_mutual_inductance_near(data, precision, d_near, (FP_TYPE) i * 0.1);
