@@ -5,6 +5,11 @@
 #include "inductance_zupan.h"
 #include "inductance_remainder_bound.h"
 
+/**
+ * @brief Main function to test the inductance calculation functions. It is not a
+ * main function in a classical sense, but rather meant to showcase the usage of the
+ * library.
+ */
 int main() {
     CoilCalculationData data;
 

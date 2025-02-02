@@ -10,11 +10,24 @@
 #include "factorial_lookup.h"
 
 
+/**
+ * @brief Naive implementation of the mutual inductance calculation for coils that are far apart.
+ *
+ * This function is meant to show how slow C code can be when not optimized for the hardware nor
+ * algorithmically (using pow). It is not recommended to use this function for any practical
+ * application.
+ *
+ * @param data The coil calculation data containing the physical properties of the coils.
+ * @param precision The precision data specifying the number of terms in the series expansion.
+ * @param d The distance between the coils.
+ * @param timing Whether to print the time taken for the calculation.
+ * @return
+ */
 double calculate_mutual_inductance_far_unoptimized(
         const CoilCalculationData data,
         const SumPrecisionData precision,
         const double d,
-        bool timing
+        const bool timing
 ) {
     double M_12 = 0.0;
 
@@ -68,12 +81,30 @@ double calculate_mutual_inductance_far_unoptimized(
 }
 
 
+/**
+ * @brief Naive implementation of the mutual inductance calculation for coils that are near each other.
+ * Normed version.
+ *
+ * This function is meant to show how slow C code can be when not optimized for the hardware nor
+ * algorithmically (using pow). It is not recommended to use this function for any practical
+ * application.
+ *
+ * The normed version was introduced hoping to avoid numerical issues, but in the end it turned
+ * out that there are really no numerical issues.
+ *
+ * @param data The coil calculation data containing the physical properties of the coils.
+ * @param precision The precision data specifying the number of terms in the series expansion.
+ * @param d The distance between the coils.
+ * @param Z The distance between the coils and the point of interest.
+ * @param timing Whether to print the time taken for the calculation.
+ * @return
+ */
 double calculate_mutual_inductance_near_unoptimized_normed(
         const CoilCalculationData data,
         const SumPrecisionData precision,
         const double d,
         const double Z,
-        bool timing
+        const bool timing
 ) {
     double M_12 = 0.0;
 
@@ -128,12 +159,27 @@ double calculate_mutual_inductance_near_unoptimized_normed(
     return M_12;
 }
 
+
+/**
+ * @brief Naive implementation of the mutual inductance calculation for coils that are near each other.
+ *
+ * This function is meant to show how slow C code can be when not optimized for the hardware nor
+ * algorithmically (using pow). It is not recommended to use this function for any practical
+ * application.
+ *
+ * @param data The coil calculation data containing the physical properties of the coils.
+ * @param precision The precision data specifying the number of terms in the series expansion.
+ * @param d The distance between the coils.
+ * @param Z The value of the free parameter, modulates the convergence of the series.
+ * @param timing Whether to print the time taken for the calculation.
+ * @return
+ */
 double calculate_mutual_inductance_near_unoptimized(
         const CoilCalculationData data,
         const SumPrecisionData precision,
         const double d,
         const double Z,
-        bool timing
+        const bool timing
 ) {
     double M_12 = 0.0;
 

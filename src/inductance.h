@@ -16,15 +16,15 @@
  *
  * @param data The coil calculation data containing the physical properties of the coils.
  * @param precision The precision data specifying the number of terms in the series expansion.
- * @param d The distance between the coils.
- * @param Z The axial distance between the coils.
+ * @param d The distance between the coils, d > 0.
+ * @param verbose Whether to print the results and performance of the optimization process.
  * @return The calculated mutual inductance.
  */
 FP_TYPE calculate_mutual_inductance(
         const CoilCalculationData data,
         const SumPrecisionData precision,
         const FP_TYPE d,
-        bool verbose
+        const bool verbose
 ) {
     if (data.r_1 <= 0.0 || data.R_1 <= 0.0 || data.L_1 <= 0.0 || data.N_1 <= 0.0 ||
         data.r_2 <= 0.0 || data.R_2 <= 0.0 || data.L_2 <= 0.0 || data.N_2 <= 0.0) {
@@ -105,6 +105,26 @@ FP_TYPE calculate_mutual_inductance(
     }
 }
 
+
+/**
+ * @brief A version of calculate_mutual_inductance that takes raw input values. Meant as a
+ * minimal interface for the mutual inductance calculation.
+ *
+ * @param r_1 The inner radius of the first coil, r_1 > 0.
+ * @param R_1 The outer radius of the first coil, R_1 > 0.
+ * @param L_1 The length of the first coil, L_1 > 0.
+ * @param N_1 The number of turns in the first coil, N_1 > 0.
+ * @param r_2 The inner radius of the second coil, r_2 > 0.
+ * @param R_2 The outer radius of the second coil, R_2 > 0.
+ * @param L_2 The length of the second coil, L_2 > 0.
+ * @param N_2 The number of turns in the second coil, N_2 > 0.
+ * @param d The distance between the coils, d > 0.
+ * @param k_terms The number of terms in the series expansion for the k index.
+ * @param l_terms The number of terms in the series expansion for the l index.
+ * @param n_terms The number of terms in the series expansion for the n index.
+ * @param verbose Whether to print the results and performance of the optimization process.
+ * @return The calculated mutual inductance.
+ */
 FP_TYPE calculate_mutual_inductance_raw(
         const FP_TYPE r_1,
         const FP_TYPE R_1,
@@ -118,11 +138,11 @@ FP_TYPE calculate_mutual_inductance_raw(
         const uint32_t k_terms,
         const uint32_t l_terms,
         const uint32_t n_terms,
-        bool verbose
+        const bool verbose
 ) {
-    CoilCalculationData data = {r_1, R_1, L_1, N_1, r_2, R_2, L_2, N_2};
+    const CoilCalculationData data = {r_1, R_1, L_1, N_1, r_2, R_2, L_2, N_2};
 
-    SumPrecisionData precision = {k_terms, l_terms, n_terms};
+    const SumPrecisionData precision = {k_terms, l_terms, n_terms};
 
     return calculate_mutual_inductance(data, precision, d, verbose);
 }

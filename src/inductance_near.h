@@ -13,6 +13,7 @@
 #include "immintrin.h"
 #endif
 
+
 /**
  * @brief Calculate the mutual inductance between two coils which are sufficiently close that
  * the choice of Z is not obvious.
@@ -22,10 +23,14 @@
  * multiplications. Definitions in settings.h can be used to enable vectorized operations
  * (if available).
  *
+ * This function is usually not recommended to be used with a user specified Z, as it is not
+ * guaranteed to produce a very good result without a good guess. Use guess_best_inductance_near
+ * to find a good value of Z for which the computation will be accurate.
+ *
  * @param data The coil calculation data containing the physical properties of the coils.
  * @param precision The precision data specifying the number of terms in the series expansion.
  * @param d The distance between the coils.
- * @param Z The axial distance between the coils.
+ * @param Z The value of free parameter, modulates the convergence of the series.
  * @return The calculated mutual inductance.
  */
 FP_TYPE calculate_mutual_inductance_near(
@@ -255,6 +260,23 @@ FP_TYPE calculate_mutual_inductance_near(
     return M_12;
 }
 
+
+/**
+ * @brief Calculate the derivative of the mutual inductance between two coils with respect to the
+ * free parameter Z. Used in GSS algorithm to find the optimal value of Z.
+ *
+ * This function calculates the derivative of the mutual inductance between two coils with respect
+ * to the free parameter Z. Usually this is not an interesting quantity, but as we found in the
+ * paper, it is very important to have a good guess for Z to obtain a good result. Thus, an
+ * optimization over Z is necessary and the derivative was found to be much more useful than the
+ * function value itself.
+ *
+ * @param data The coil calculation data containing the physical properties of the coils.
+ * @param precision The precision data specifying the number of terms in the series expansion.
+ * @param d The distance between the coils.
+ * @param Z The value of free parameter, modulates the convergence of the series.
+ * @return The calculated mutual inductance.
+ */
 FP_TYPE calculate_mutual_inductance_near_dz(
         const CoilCalculationData data,
         const SumPrecisionData precision,
@@ -554,6 +576,24 @@ FP_TYPE calculate_mutual_inductance_near_dz(
 }
 
 
+/**
+ * @brief Calculate the mutual inductance between two circular coils which are sufficiently
+ * close that the choice of the free parameter Z is important.
+ *
+ * The function executes a Golden Section Search (GSS) optimization over the free parameter Z,
+ * minimizing the variation of the mutual inductance with respect to Z (i.e. the absolute value of
+ * the derivative of the mutual inductance with respect to Z). The optimization is performed over
+ * a range of Z values from Z_start to Z_end.
+ *
+ * @param data The coil calculation data containing the physical properties of the coils.
+ * @param precision The precision data specifying the number of terms in the series expansion.
+ * @param d The distance between the coils.
+ * @param Z_start The smallest value of the free parameter Z used in the optimization.
+ * @param Z_end The largest value of the free parameter Z used in the optimization.
+ * @param verbose Whether to print the results of the optimization.
+ * @param r_tol The relative tolerance of the optimization (relative to the characteristic length).
+ * @return
+ */
 FP_TYPE guess_best_inductance_near(
         const CoilCalculationData data,
         const SumPrecisionData precision,
@@ -632,6 +672,12 @@ FP_TYPE guess_best_inductance_near(
     return best_value;
 }
 
+
+/** @brief Benchmark the mutual inductance near function with a given number of repeats
+ *
+ * @param precision The precision struct to use for the benchmark
+ * @param n_repeats The number of times to repeat the calculation
+ */
 void benchmark_mutual_inductance_near(const SumPrecisionData precision, const uint32_t n_repeats) {
     struct timespec start_time;
     struct timespec end_time;
@@ -667,6 +713,5 @@ void benchmark_mutual_inductance_near(const SumPrecisionData precision, const ui
     printf("Time per iteration =    %g s\n", interval / (double) n_repeats);
     printf("Result (printed to prevent compiler optimization) = %.15g\n\n", result);
 }
-
 
 #endif //VECTOR_CASE_INDUCTANCE_NEAR_H

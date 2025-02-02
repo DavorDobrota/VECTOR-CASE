@@ -1,5 +1,5 @@
-#ifndef VECTOR_CASE_FAR_INDUCTANCE_HPP
-#define VECTOR_CASE_FAR_INDUCTANCE_HPP
+#ifndef VECTOR_CASE_FAR_INDUCTANCE_H
+#define VECTOR_CASE_FAR_INDUCTANCE_H
 
 #include <math.h>
 #include <stdio.h>
@@ -13,6 +13,23 @@
 #endif
 
 
+/**
+ * @brief Calculate the mutual inductance between two coils which are sufficiently far apart that
+ * the choice of Z is obvious: Z = -L1/2.
+ *
+ * This function calculates the mutual inductance between two coils using a triple series expansion
+ * implemented with nested loops designed to reuse calculations and minimize the number of
+ * multiplications. Definitions in settings.h can be used to enable vectorized operations
+ * (if available).
+ *
+ * A separate function has been introduced for this case because the sum is assumed to be convergent
+ * and half the terms drop due to the choice of Z. This allows for a more efficient calculation.
+ *
+ * @param data The coil calculation data containing the physical properties of the coils.
+ * @param precision The precision data specifying the number of terms in the series expansion.
+ * @param d The distance between the coils.
+ * @return The calculated mutual inductance.
+ */
 double calculate_mutual_inductance_far(
         const CoilCalculationData data,
         const SumPrecisionData precision,
@@ -237,6 +254,12 @@ double calculate_mutual_inductance_far(
     return M_12;
 }
 
+
+/** @brief Benchmark the mutual inductance far function with a given number of repeats
+ *
+ * @param precision The precision struct to use for the benchmark
+ * @param n_repeats The number of times to repeat the calculation
+ */
 void benchmark_mutual_inductance_far(const SumPrecisionData precision, const uint32_t n_repeats) {
     struct timespec start_time;
     struct timespec end_time;
@@ -273,4 +296,4 @@ void benchmark_mutual_inductance_far(const SumPrecisionData precision, const uin
     printf("Result (printed to prevent compiler optimization) = %.15g\n\n", result);
 }
 
-#endif //VECTOR_CASE_FAR_INDUCTANCE_HPP
+#endif //VECTOR_CASE_FAR_INDUCTANCE_H

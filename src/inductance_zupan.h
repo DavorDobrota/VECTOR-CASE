@@ -7,6 +7,20 @@
 #include "gauss_legendre_lookup.h"
 
 
+/**
+ * @brief Calculate the mutual inductance between two coils using the Zupan formula.
+ *
+ * It implements the kernel outlined in the paper, which is invoked with varying parameters
+ * to compute the mutual inductance for a given angle phi. The kernel is then integrated
+ * numerically using the Gauss-Legendre quadrature method.
+ *
+ * @param r Inner radius of one of the coils.
+ * @param R Outer radius of one of the coils.
+ * @param z starting height of one of the coils.
+ * @param Z ending height of one of the coils.
+ * @param phi The angle over which numerical integration is performed.
+ * @return Computation result
+ */
 FP_TYPE calculate_kernel_zupan(
         const FP_TYPE r,
         const FP_TYPE R,
@@ -81,6 +95,25 @@ FP_TYPE calculate_kernel_zupan(
     return result;
 }
 
+
+/**
+ * @brief Our implementation of the mutual inductance calculation between two coils by Zupan et al (2014).
+ *
+ * The approach outlined in the paper achieves high performance, but it is unfortunately oscillatory and
+ * does not converge for larger numbers of Gauss-Legendre points. This implementation is provided as a
+ * reference to what precision can in general be expected. Find a Mathematica notebook in the appropriate
+ * folder for an implementation that is more stable.
+ *
+ * Sub-intervals were introduced in an effort to stabilize the calculation, but the results are still
+ * not great. With some tuning it is possible to get about 7 digits of precision, and the computation
+ * is reasonably fast.
+ *
+ * @param data The coil calculation data containing the physical properties of the coils.
+ * @param d The distance between the coils.
+ * @param sub_intervals The number of sub-intervals for composite quadrature.
+ * @param num_gl_points Number of Gauss-Legendre points for each sub-interval.
+ * @return The calculated mutual inductance.
+ */
 FP_TYPE calculate_mutual_inductance_zupan(
         const CoilCalculationData data,
         const FP_TYPE d,

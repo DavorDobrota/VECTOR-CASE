@@ -1,3 +1,16 @@
+# -*- coding: utf-8 -*-
+"""Lookup table generation for the mutual inductance calculation
+@Author: Davor Dobrota
+
+Optimized mutual inductance calculation requires precomputed lookup tables for the coefficients
+of the triple sum formula. This script generates the lookup tables for the near and far terms of
+the triple sum formula. The tables are written to C header files for use in the C implementation.
+
+The number of terms can be adjusted by the user, but mind the fact that C can only represent
+numbers which are smaller than 1e308. This limits the practical number of terms ~100. Exact
+testing of the limits was not conducted.
+"""
+
 from decimal import Decimal, getcontext
 getcontext().prec = 25
 
@@ -103,6 +116,7 @@ def write_lookup_table_to_file(lookup_table, max_terms, near: bool, fp_type="dou
 
 if __name__ == '__main__':
     terms = 64
+
     table_near = generate_lookup_table_near(terms, terms, terms)
     write_lookup_table_to_file(table_near, terms, True, fp_type="double")
 

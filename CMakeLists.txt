@@ -22,7 +22,6 @@ set(SOURCE_FILES
 
     src/inductance.h
     src/inductance_naive.h
-    src/inductance_fast.h
     src/inductance_far.h
     src/inductance_near.h
     src/inductance_zupan.h

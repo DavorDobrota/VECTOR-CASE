@@ -9,6 +9,22 @@
 #include "factorial_lookup.h"
 
 
+/**
+ * @brief Remainder bound for the triple series expansion of coaxial mutual inductance. This version
+ * is unoptimized but the more optimized one is not yet done.
+ *
+ * The paper outlined the estimate of the remainder term for the triple series expansion in the form
+ * of a bound. This function calculates the bound for the remainder for given parameters. The bound is
+ * usually quite pessimistic, but it can be a good indicator of the error if the coils are sufficiently
+ * separated.
+ *
+* @param data The coil calculation data containing the physical properties of the coils.
+ * @param precision The precision data specifying the number of terms in the series expansion.
+ * @param d The distance between the coils.
+ * @param Z The value of free parameter, modulates the convergence of the series.
+ * @param timing Whether to print the time taken for the calculation.
+ * @return The calculated remainder bound.
+ */
 FP_TYPE calculate_inductance_remainder_unoptimized(
         const CoilCalculationData data,
         const SumPrecisionData precision,
@@ -314,6 +330,17 @@ FP_TYPE calculate_inductance_remainder_unoptimized(
     return r;
 }
 
+
+/**
+ * Work in progress: Optimized version of the remainder bound calculation for the triple series expansion
+ *
+ * @param data The coil calculation data containing the physical properties of the coils
+ * @param precision The precision data specifying the number of terms in the series expansion
+ * @param d The distance between the coils
+ * @param Z The value of the free parameter, modulates the convergence of the series
+ * @param timing Whether to print the time taken for the calculation
+ * @return The calculated remainder bound
+ */
 FP_TYPE calculate_inductance_remainder(
         const CoilCalculationData data,
         const SumPrecisionData precision,
