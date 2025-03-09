@@ -9,8 +9,8 @@
 // #define USE_AVX512
 
 // For now just double precision is supported because float
-// precision is not enough in most application and makes
-// everything harder to manipulate and maintain
+// precision is not enough for most applications and makes
+// the code harder to manipulate and maintain
 #if defined(USING_DOUBLE)
 #define FP_TYPE double
 #else

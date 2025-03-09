@@ -7,8 +7,7 @@
 
 /**
  * @brief Main function to test the inductance calculation functions. It is not a
- * main function in a classical sense, but rather meant to showcase the usage of the
- * library.
+ * main function in a classical sense, but rather meant to show how to use the library.
  */
 int main() {
     CoilCalculationData data;
