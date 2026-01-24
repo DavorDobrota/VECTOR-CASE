@@ -254,7 +254,7 @@ FP_TYPE calculate_mutual_inductance_near(
     M_12 += _mm512_reduce_add_pd(M_12_vec);
 #endif
 
-    M_12 *= 4.0 * local_pi * local_pi * 1e-7 * data.N_1 * data.N_2
+    M_12 *= 4.0 * LOCAL_M_PI * LOCAL_M_PI * 1e-7 * data.N_1 * data.N_2
           / (data.L_1 * data.L_2 * (data.R_1 - data.r_1) * (data.R_2 - data.r_2));
 
     return M_12;
@@ -569,7 +569,7 @@ FP_TYPE calculate_mutual_inductance_near_dz(
     M_12 += _mm512_reduce_add_pd(M_12_vec);
 #endif
 
-    M_12 *= 4.0 * local_pi * local_pi * 1e-7 * data.N_1 * data.N_2
+    M_12 *= 4.0 * LOCAL_M_PI * LOCAL_M_PI * 1e-7 * data.N_1 * data.N_2
             / (data.L_1 * data.L_2 * (data.R_1 - data.r_1) * (data.R_2 - data.r_2));
 
     return M_12;

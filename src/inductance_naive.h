@@ -65,7 +65,7 @@ double calculate_mutual_inductance_far_unoptimized(
         }
     }
 
-    M_12 *= 4.0e-7 * local_pi * local_pi * data.N_1 * data.N_2
+    M_12 *= 4.0e-7 * LOCAL_M_PI * LOCAL_M_PI * data.N_1 * data.N_2
           / (data.L_2 * (data.R_1 - data.r_1) * (data.R_2 - data.r_2));
 
     if (timing) {
@@ -144,7 +144,7 @@ double calculate_mutual_inductance_near_unoptimized_normed(
         }
     }
 
-    M_12 *= (double) (4e-7) * local_pi * local_pi * data.N_1 * data.N_2 * pow(Z, 5)
+    M_12 *= (double) (4e-7) * LOCAL_M_PI * LOCAL_M_PI * data.N_1 * data.N_2 * pow(Z, 5)
           / (data.L_1 * data.L_2 * (data.R_1 - data.r_1) * (data.R_2 - data.r_2));
 
     if (timing) {
@@ -217,7 +217,7 @@ double calculate_mutual_inductance_near_unoptimized(
         }
     }
 
-    M_12 *= 4.0 * local_pi * local_pi * 1e-7 * data.N_1 * data.N_2
+    M_12 *= 4.0 * LOCAL_M_PI * LOCAL_M_PI * 1e-7 * data.N_1 * data.N_2
           / (data.L_1 * data.L_2 * (data.R_1 - data.r_1) * (data.R_2 - data.r_2));
 
     if (timing) {

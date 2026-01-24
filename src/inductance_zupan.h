@@ -132,7 +132,7 @@ FP_TYPE calculate_mutual_inductance_zupan(
 
     FP_TYPE M_12 = 0.0;
 
-    FP_TYPE interval_len = local_pi / ((FP_TYPE) sub_intervals);
+    FP_TYPE interval_len = LOCAL_M_PI / ((FP_TYPE) sub_intervals);
 
     for (uint32_t i = 0; i < sub_intervals; ++i) {
 
@@ -140,7 +140,7 @@ FP_TYPE calculate_mutual_inductance_zupan(
 
         for (uint32_t k = 0; k < num_gl_points; ++k) {
             FP_TYPE phi = local_offset + 0.5 * interval_len * (1.0 + gl_positions[num_gl_points - 1][k]);
-            FP_TYPE weight = gl_weights[num_gl_points - 1][k] * local_pi * 0.5;
+            FP_TYPE weight = gl_weights[num_gl_points - 1][k] * LOCAL_M_PI * 0.5;
             FP_TYPE cos_phi = cos(phi);
 
             FP_TYPE G = calculate_kernel_zupan(R_1, R_3, Z_1, Z_3, phi)
@@ -164,7 +164,7 @@ FP_TYPE calculate_mutual_inductance_zupan(
         }
     }
 
-    M_12 *= 4.0e-7 * local_pi * data.N_1 * data.N_2
+    M_12 *= 4.0e-7 * LOCAL_M_PI * data.N_1 * data.N_2
           / (data.L_1 * data.L_2 * (data.R_1 - data.r_1) * (data.R_2 - data.r_2) * (FP_TYPE) sub_intervals);
 
     return M_12;

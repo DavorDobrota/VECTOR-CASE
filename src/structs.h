@@ -5,7 +5,7 @@
 
 #include "settings.h"
 
-const FP_TYPE local_pi = 3.14159265358979323846;
+const FP_TYPE LOCAL_M_PI = 3.14159265358979323846;
 
 
 /**

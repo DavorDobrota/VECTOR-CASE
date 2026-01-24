@@ -14,6 +14,7 @@ endif()
 set(SOURCE_FILES
     src/settings.h
     src/structs.h
+    src/timing.h
 
     src/factorial_lookup.h
     src/gauss_legendre_lookup.h
@@ -26,10 +27,15 @@ set(SOURCE_FILES
     src/inductance_near.h
     src/inductance_zupan.h
     src/inductance_remainder_bound.h
+
+    src/hypergeometric.h
+    src/gauss_kronrod_lookup.h
+    src/inductance_radial.h
 )
 
 add_executable(vector_case_exec ${SOURCE_FILES} src/main.c)
 add_executable(vector_case_test src/inductance.h src/test.c)
+add_executable(vector_case_test_radial src/inductance_radial.h src/test_radial.c)
 
 add_library(vector_case SHARED ${SOURCE_FILES})
 set_target_properties(vector_case PROPERTIES LINKER_LANGUAGE C)
@@ -38,4 +44,5 @@ set_target_properties(vector_case PROPERTIES LINKER_LANGUAGE C)
 if (UNIX)
     target_link_libraries(vector_case_exec m)
     target_link_libraries(vector_case_test m)
+    target_link_libraries(vector_case_test_radial m)
 endif()
