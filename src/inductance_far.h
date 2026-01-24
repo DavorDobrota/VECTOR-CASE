@@ -248,7 +248,7 @@ double calculate_mutual_inductance_far(
     M_12 += _mm512_reduce_add_pd(M_12_vec);
 #endif
 
-    M_12 *= (FP_TYPE) (4.0e-7) * local_pi * local_pi * data.N_1 * data.N_2
+    M_12 *= (FP_TYPE) (4.0e-7) * LOCAL_M_PI * LOCAL_M_PI * data.N_1 * data.N_2
           / (data.L_2 * (data.R_1 - data.r_1) * (data.R_2 - data.r_2));
 
     return M_12;

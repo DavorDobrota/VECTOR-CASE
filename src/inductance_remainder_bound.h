@@ -315,7 +315,7 @@ FP_TYPE calculate_inductance_remainder_unoptimized(
 
     FP_TYPE r = q + u;
 
-    r *= (FP_TYPE) (4.0e-7) * local_pi * local_pi * data.N_1 * data.N_2
+    r *= (FP_TYPE) (4.0e-7) * LOCAL_M_PI * LOCAL_M_PI * data.N_1 * data.N_2
          / (data.L_1 * data.L_2 * (data.R_1 - data.r_1) * (data.R_2 - data.r_2));
 
     if (timing) {
@@ -687,7 +687,7 @@ FP_TYPE calculate_inductance_remainder(
 
     FP_TYPE r = q + u;
 
-    r *= (FP_TYPE) (4.0e-7) * local_pi * local_pi * data.N_1 * data.N_2
+    r *= (FP_TYPE) (4.0e-7) * LOCAL_M_PI * LOCAL_M_PI * data.N_1 * data.N_2
          / (data.L_1 * data.L_2 * (data.R_1 - data.r_1) * (data.R_2 - data.r_2));
 
     return r;
