@@ -7,14 +7,12 @@ name = "vector-case-demo"
 version = "1.0.0"
 description = "Python interface for the VECTOR-CASE mutual inductance calculation library"
 readme = "README.md"
-license = {text = "MIT"}
 authors = [
     {name = "Davor Dobrota"}
 ]
 requires-python = ">=3.9"
 classifiers = [
     "Intended Audience :: Science/Research",
-    "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.9",

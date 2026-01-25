@@ -3,10 +3,10 @@
 
 #include <math.h>
 #include <stdio.h>
-#include <time.h>
 
 #include "structs.h"
 #include "factorial_lookup.h"
+#include "timing.h"
 
 
 /**
@@ -32,10 +32,10 @@ FP_TYPE calculate_inductance_remainder_unoptimized(
         const FP_TYPE Z,
         bool timing
 ) {
-    struct timespec start_time;
+    Timer timer;
 
     if (timing) {
-        timespec_get(&start_time, TIME_UTC);
+        timer_start(&timer);
     }
 
     FP_TYPE abs_Z = fabs(Z);
@@ -319,11 +319,7 @@ FP_TYPE calculate_inductance_remainder_unoptimized(
          / (data.L_1 * data.L_2 * (data.R_1 - data.r_1) * (data.R_2 - data.r_2));
 
     if (timing) {
-        struct timespec end_time;
-        timespec_get(&end_time, TIME_UTC);
-
-        double interval = (double) (end_time.tv_sec - start_time.tv_sec)
-                        + (double) (end_time.tv_nsec - start_time.tv_nsec) * 1e-9;
+        const double interval = timer_elapsed(&timer);
         printf("Remainder Time = %f s\n", interval);
     }
 
@@ -348,10 +344,10 @@ FP_TYPE calculate_inductance_remainder(
         const FP_TYPE Z,
         bool timing
 ) {
-    struct timespec start_time;
+    Timer timer;
 
     if (timing) {
-        timespec_get(&start_time, TIME_UTC);
+        timer_start(&timer);
     }
 
     int L = (int) precision.l_terms - 1;

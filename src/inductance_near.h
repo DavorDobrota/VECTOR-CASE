@@ -2,12 +2,12 @@
 #define VECTOR_CASE_INDUCTANCE_NEAR_H
 
 #include <stdio.h>
-#include <time.h>
 #include <math.h>
 #include <stdbool.h>
 
 #include "structs.h"
 #include "sum_lookup_table_near.h"
+#include "timing.h"
 
 #if defined(USE_SSE) || defined(USE_AVX) || defined(USE_AVX512)
 #include "immintrin.h"
@@ -603,10 +603,10 @@ FP_TYPE guess_best_inductance_near(
         bool verbose,
         const FP_TYPE r_tol
 ){
-    struct timespec start_time;
+    Timer timer;
 
     if (verbose) {
-        timespec_get(&start_time, TIME_UTC);
+        timer_start(&timer);
     }
 
     FP_TYPE characteristic_length = data.R_1 > data.R_2 ? data.R_1 : data.R_2;
@@ -657,11 +657,7 @@ FP_TYPE guess_best_inductance_near(
     FP_TYPE best_value = calculate_mutual_inductance_near(data, precision, d, best_Z);
 
     if (verbose) {
-        struct timespec end_time;
-        timespec_get(&end_time, TIME_UTC);
-
-        double interval = (double) (end_time.tv_sec - start_time.tv_sec)
-                        + (double) (end_time.tv_nsec - start_time.tv_nsec) / 1e9;
+        const double interval = timer_elapsed(&timer);
 
         printf("Optimized with search time =    %g s\n", interval);
         printf("Number of iterations =          %u\n", counter);
@@ -678,10 +674,7 @@ FP_TYPE guess_best_inductance_near(
  * @param precision The precision struct to use for the benchmark
  * @param n_repeats The number of times to repeat the calculation
  */
-void benchmark_mutual_inductance_near(const SumPrecisionData precision, const uint32_t n_repeats) {
-    struct timespec start_time;
-    struct timespec end_time;
-
+static void benchmark_mutual_inductance_near(const SumPrecisionData precision, const uint32_t n_repeats) {
     CoilCalculationData data = {
         .R_1 = 0.1,
         .r_1 = 0.05,
@@ -694,23 +687,23 @@ void benchmark_mutual_inductance_near(const SumPrecisionData precision, const ui
     };
 
     // Volatile to prevent the compiler optimizing out the for loop
-    volatile FP_TYPE result;
+    volatile FP_TYPE result = 0.0;
 
-    timespec_get(&start_time, TIME_UTC);
+    Timer timer;
+    timer_start(&timer);
 
     for (uint32_t i = 0; i < n_repeats; ++i) {
-        result = calculate_mutual_inductance_near(data, precision, (FP_TYPE) i * 0.0001, 1.0);
+        result += guess_best_inductance_near(
+            data, precision, 0.05, 0.0, 1.0, false, 1e-6
+        );
     }
 
-    timespec_get(&end_time, TIME_UTC);
-
-    double interval = (double) (end_time.tv_sec - start_time.tv_sec)
-                    + (double) (end_time.tv_nsec - start_time.tv_nsec) * 1e-9;
+    const double interval = timer_elapsed(&timer);
 
     printf("\nBenchmarked mutual inductance near with %u repeats\n", n_repeats);
     printf("Precision: L = %u, K = %u, N = %u\n", precision.l_terms, precision.k_terms, precision.n_terms);
     printf("Elapsed time =          %g s\n", interval);
-    printf("Time per iteration =    %g s\n", interval / (double) n_repeats);
+    printf("Time per iteration =    %.3e s\n", interval / (double) n_repeats);
     printf("Result (printed to prevent compiler optimization) = %.15g\n\n", result);
 }
 

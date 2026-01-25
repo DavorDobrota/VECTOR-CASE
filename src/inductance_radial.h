@@ -177,13 +177,15 @@ static FP_TYPE f_n_func(const FP_TYPE x, const FP_TYPE r_2, const FP_TYPE R_2, c
  * @param offset_1 The offset of the first coil along the z-axis.
  * @param offset_2 The offset of the second coil along the z-axis.
  * @param relative_tol The relative tolerance for convergence of the series expansion.
+ * @param verbose Whether to print convergence information.
  * @return Mutual inductance of radially separated coils.
  */
 static FP_TYPE calculate_mutual_inductance_radial(
         const CoilCalculationData data,
         const FP_TYPE offset_1,
         const FP_TYPE offset_2,
-        const FP_TYPE relative_tol
+        const FP_TYPE relative_tol,
+        const bool verbose
 ) {
     FP_TYPE M_12 = 0.0;
 
@@ -235,25 +237,25 @@ static FP_TYPE calculate_mutual_inductance_radial(
 
         M_12 += term;
 
-        // Underflow can cause the term to be very small. The sum did not converge yet in reality, but
-        // the term can be zero nonetheless. One still wants truncated sum estimation to work, so converged
-        // is not set to true in this case.
-        if (fabs(term) < relative_tol * M_12 && fabs(term) < 1e-100) {
-            // printf("Term %u converged to %g\n", n, term);
-            break;
-        }
-
         // This is "regular" convergence, because the term did not underflow, no need for truncated sum estimation.
         if (fabs(term) < relative_tol * M_12) {
             converged = true;
-            // printf("Converged after %u terms\n", n);
+            if (verbose)
+                printf("Converged after %u terms with residual of (relative) magnitude %.3e\n", n, fabs(term) / M_12);
             break;
         }
-        // printf("%u \t %g\n", n, term);
     }
 
     if (!converged) {
-        // Extract last 30 terms and their indices
+        if (verbose) {
+            printf(
+                "Series did not converge after %d terms, residual (relative) magnitude %.3e\n",
+                MAX_NUM_TERMS,
+                fabs(terms[MAX_NUM_TERMS - 1]) / M_12
+            );
+        }
+
+        // Extract last N_INTERPOLATION_VALUES terms and their indices
         FP_TYPE x_values[N_INTERPOLATION_VALUES];
         FP_TYPE y_values[N_INTERPOLATION_VALUES];
         int count = 0;
@@ -292,9 +294,6 @@ static FP_TYPE calculate_mutual_inductance_radial(
                 const FP_TYPE b = slope;
                 const FP_TYPE remaining_sum = a * pow(MAX_NUM_TERMS, b + 1) / (-b - 1);
 
-
-                // printf("Estimated remaining sum: %g\n", remaining_sum);
-
                 // Add the estimated remaining sum to M_12
                 if (terms[MAX_NUM_TERMS - 1] < 0.0) {
                     M_12 -= remaining_sum; // Adjust sign if necessary
@@ -302,6 +301,11 @@ static FP_TYPE calculate_mutual_inductance_radial(
                 else {
                     M_12 += remaining_sum; // Adjust sign if necessary
                 }
+
+                if (verbose)
+                    printf("Estimated sum remainder using power-law fit;     (relative) magnitude %.3e\n",
+                        remaining_sum / M_12
+                    );
             }
         }
     }
@@ -343,15 +347,17 @@ static void benchmark_mutual_inductance_radial(const uint32_t n_repeats, const b
             data,
             -0.5 * data.L_1 + (FP_TYPE) i * 0.00001,
             -0.5 * data.L_1 + (FP_TYPE) i * 0.00001,
-            relative_tol
+            relative_tol,
+            false
         );
     }
 
     const double interval = timer_elapsed(&timer);
 
-    printf("\nBenchmarked mutual inductance near with %u repeats\n", n_repeats);
+    printf("\nBenchmarked mutual inductance radial with %u repeats\n", n_repeats);
+    printf("Using the series representation: %s\n", fast ? "YES" : "NO");
     printf("Elapsed time =          %g s\n", interval);
-    printf("Time per iteration =    %g s\n", interval / (double) n_repeats);
+    printf("Time per iteration =    %.3e s\n", interval / (double) n_repeats);
     printf("Result (printed to prevent compiler optimization) = %.15g\n\n", result);
 }
 

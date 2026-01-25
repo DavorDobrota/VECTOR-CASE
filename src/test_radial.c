@@ -165,9 +165,9 @@ int main() {
         0.000809661707357942008
     };
 
-    FP_TYPE values[NUM_TEST_CASES] = {};
-    FP_TYPE errors[NUM_TEST_CASES] = {};
-    FP_TYPE execution_times[NUM_TEST_CASES] = {};
+    FP_TYPE values[NUM_TEST_CASES] = {0.0};
+    FP_TYPE errors[NUM_TEST_CASES] = {0.0};
+    FP_TYPE execution_times[NUM_TEST_CASES] = {0.0};
 
 
     for (uint32_t i = 0; i < NUM_TEST_CASES; i++) {
@@ -192,7 +192,8 @@ int main() {
             coil_configurations[i],
             offsets[i][0],
             offsets[i][1],
-            1e-16
+            1e-16,
+            true
         );
 
         printf("M_12 for test case %2d               : %.16g\n", i + 1, M_12);
@@ -216,7 +217,8 @@ int main() {
                 coil_configurations[i],
                 offsets[i][0],
                 offsets[i][1],
-                1e-16
+                1e-16,
+                false
             );
         }
 

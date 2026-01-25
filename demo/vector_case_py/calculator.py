@@ -139,9 +139,6 @@ class MutualInductanceCalculator:
         >>> coil2 = Coil(0.3, 0.4, 0.1, 100)
         >>> inductance = calculator.calculate(coil1, coil2, distance=0.1)  # doctest: +SKIP
         """
-        if distance <= 0:
-            raise ValueError(f"distance must be positive, got {distance}")
-
         result = self.lib.lib.calculate_mutual_inductance_raw(
             coil1.inner_radius,
             coil1.outer_radius,
@@ -286,6 +283,26 @@ class MutualInductanceCalculator:
         """
         precision_data = self._create_precision_data()
         self.lib.lib.benchmark_mutual_inductance_far(precision_data[0], n_repeats)
+
+    def benchmark_radial(self, n_repeats: int = 1000, fast: bool = True, relative_tol: float = 1e-16) -> None:
+        """
+        Run a benchmark for the radial sum calculation method.
+
+        Parameters
+        ----------
+        n_repeats : int, optional
+            Number of iterations for the benchmark. Default is 1000.
+        fast : bool, optional
+            Whether the series or the integral formulation for the 3F2
+            hypergeometric function should be used. Default is True (series).
+        relative_tol : float, optional
+            Relative tolerance for the integral formulation. Default is 1e-16.
+
+        Notes
+        -----
+        Results are printed to stdout by the C library.
+        """
+        self.lib.lib.benchmark_mutual_inductance_radial(n_repeats, fast, relative_tol)
 
     def _create_coil_data(self, coil1: Coil, coil2: Coil) -> Any:
         """

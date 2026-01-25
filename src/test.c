@@ -91,8 +91,8 @@ int main() {
         0.021453866158409343
     };
 
-    FP_TYPE values[NUM_TEST_CASES] = {};
-    FP_TYPE errors[NUM_TEST_CASES] = {};
+    FP_TYPE values[NUM_TEST_CASES] = {0.0};
+    FP_TYPE errors[NUM_TEST_CASES] = {0.0};
 
     for (int i = 0; i < NUM_TEST_CASES; i++) {
         printf("Test case %d\n", i + 1);
