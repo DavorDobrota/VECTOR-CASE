@@ -16,6 +16,15 @@
 #define N_INTERPOLATION_VALUES 20
 
 
+/**
+ * @brief The zeroth term function for the radial series expansion.
+ * Includes compensation for small parameters to avoid loss of precision
+ *
+ * @param x Evaluation parameter for the function
+ * @param r Inner radius
+ * @param R Outer radius
+ * @return Function value at given parameters
+ */
 static FP_TYPE f_0_func(const FP_TYPE x, const FP_TYPE r, const FP_TYPE R) {
     FP_TYPE result = 0.0;
 
@@ -63,6 +72,15 @@ static FP_TYPE f_0_func(const FP_TYPE x, const FP_TYPE r, const FP_TYPE R) {
     return result;
 }
 
+/**
+ * @brief The first term function for the radial series expansion.
+ * Includes compensation for small parameters to avoid loss of precision
+ *
+ * @param x Evaluation parameter for the function
+ * @param r Inner radius
+ * @param R Outer radius
+ * @return Function value at given parameters
+ */
 static FP_TYPE f_1_func(const FP_TYPE x, const FP_TYPE r, const FP_TYPE R) {
     FP_TYPE result = 0.0;
 
@@ -118,6 +136,15 @@ static FP_TYPE f_1_func(const FP_TYPE x, const FP_TYPE r, const FP_TYPE R) {
     return result;
 }
 
+/**
+ * @brief The n-th term function of the radial series expansion for coaxial mutual inductance.
+ *
+ * @param x Evaluation parameter for the function
+ * @param r_2 Inner radius of the secondary coil
+ * @param R_2 Outer radius of the secondary coil
+ * @param n Term index, n >= 2
+ * @return Function value at given parameters
+ */
 static FP_TYPE f_n_func(const FP_TYPE x, const FP_TYPE r_2, const FP_TYPE R_2, const uint32_t n) {
     const FP_TYPE argument_1 = -x * x / (r_2 * r_2);
     const FP_TYPE argument_2 = -x * x / (R_2 * R_2);
@@ -133,6 +160,25 @@ static FP_TYPE f_n_func(const FP_TYPE x, const FP_TYPE r_2, const FP_TYPE R_2, c
     return term_1 - term_2;
 }
 
+/**
+ * @brief Calculate the mutual inductance between two coils which are radially separated.
+ *
+ * This function calculates the mutual inductance between two coils using a single series expansion
+ * based on hypergeometric functions. Depending on the geometric properties, the 3F2 hypergeometric
+ * function is evaluated either in terms of its series representation or via numerical integration.
+ * Therefore, the execution time heavily depends on the coil geometry.
+ *
+ * The number of terms in the sum is not fixed; it is determined dynamically based on the relative
+ * tolerance provided. If the series does not converge, i.e., the error does not fall below the
+ * provided tolerance within MAX_NUM_TERMS, a truncated sum estimation is performed to approximate
+ * the result (if the last N_INTERPOLATION_VALUES do not change sign).
+ *
+ * @param data The coil calculation data containing the physical properties of the coils.
+ * @param offset_1 The offset of the first coil along the z-axis.
+ * @param offset_2 The offset of the second coil along the z-axis.
+ * @param relative_tol The relative tolerance for convergence of the series expansion.
+ * @return Mutual inductance of radially separated coils.
+ */
 static FP_TYPE calculate_mutual_inductance_radial(
         const CoilCalculationData data,
         const FP_TYPE offset_1,
@@ -266,7 +312,14 @@ static FP_TYPE calculate_mutual_inductance_radial(
     return M_12;
 }
 
-static void benchmark_mutual_inductance_single_sum(const uint32_t n_repeats, const bool fast) {
+/** @brief Benchmark the mutual inductance radial function.
+ *
+ * @param n_repeats The number of times to repeat the calculation
+ * @param fast Whether the coil configuration tested admits a series expansion for the 3F2
+ * hypergeometric function or numerical integration has to be used
+ * @param relative_tol The relative tolerance for the series expansion convergence
+ */
+static void benchmark_mutual_inductance_radial(const uint32_t n_repeats, const bool fast, const FP_TYPE relative_tol) {
     const CoilCalculationData data = {
         .R_1 = 0.4,
         .r_1 = 0.3,
@@ -280,17 +333,17 @@ static void benchmark_mutual_inductance_single_sum(const uint32_t n_repeats, con
     };
 
     // Volatile to prevent the compiler optimizing out the for loop
-    volatile FP_TYPE result;
+    volatile FP_TYPE result = 0.0;
 
     Timer timer;
     timer_start(&timer);
 
     for (uint32_t i = 0; i < n_repeats; ++i) {
-        result = calculate_mutual_inductance_radial(
+        result += calculate_mutual_inductance_radial(
             data,
             -0.5 * data.L_1 + (FP_TYPE) i * 0.00001,
             -0.5 * data.L_1 + (FP_TYPE) i * 0.00001,
-            1e-16
+            relative_tol
         );
     }
 
