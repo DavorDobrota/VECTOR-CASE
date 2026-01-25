@@ -4,17 +4,19 @@
 
 This script demonstrates how to use the C interface of the inductance calculation library
 from Python. The library is compiled using the CFFI library, which is a foreign function
-interface for Python calling C code. The code is compiled automatically if vector_case
-module is not found in the current directory. CFFI can easily be installed using pip.
+interface for Python calling C code. The code is compiled automatically if the vector_case
+module is not found in the current directory. CFFI and setuptools can easily be installed using pip.
+Note that the script should be called from the demo directory.
 
 Note that the performance flags are commented out in the CFFI compilation, but they can be
-introduced for better performance. If your processors supports SSE, AVX2 or AVX512, you can
+introduced for better performance. If your processor supports SSE, AVX2, or AVX512, you can
 go to settings.py and uncomment the corresponding (highest capability) flag. If you do this
-after you have already compiled the library, you need delete the generated files and recompile
+after you have already compiled the library, you need to delete the generated files and recompile
 the library.
 
 Feel free to use this as a template for your own projects.
 """
+from collections.abc import Callable
 
 # Make sure the package cffi is installed using pip or other means
 from cffi import FFI
@@ -69,7 +71,7 @@ if not (importlib.util.find_spec(module_name) is not None):
         const bool verbose
     );
     
-    double calculate_mutual_inductance_raw(
+    static double calculate_mutual_inductance_raw(
         const double  r_1,
         const double R_1,
         const double L_1,
@@ -85,8 +87,8 @@ if not (importlib.util.find_spec(module_name) is not None):
         const bool verbose
     );
     
-    void benchmark_mutual_inductance_far(const SumPrecisionData precision, const uint32_t n_repeats);
-    void benchmark_mutual_inductance_near(const SumPrecisionData precision, const uint32_t n_repeats);
+    static void benchmark_mutual_inductance_far(const SumPrecisionData precision, const uint32_t n_repeats);
+    static void benchmark_mutual_inductance_near(const SumPrecisionData precision, const uint32_t n_repeats);
     """
     )
 
@@ -96,11 +98,13 @@ if not (importlib.util.find_spec(module_name) is not None):
         #include "../src/inductance.h" 
         """,
         libraries=["m"],    # Link with math library, needed for linux
+        # If you use specific instructions such as AVX512, uncomment the following lines.
+        # They might be different depending on the platform
         extra_compile_args=[
-            # "-std=c11",
-            # "-O3",
-            # "-march=native",
-            # "-mtune=native"
+            "-std=c11",
+            "-O3",
+            "-march=native",
+            "-mtune=native"
         ],
     )
 
@@ -109,6 +113,16 @@ if not (importlib.util.find_spec(module_name) is not None):
 spec = importlib.util.find_spec("vector_case")
 vector_case = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(vector_case)
+
+calculate_mutual_inductance: Callable[
+    [float, float, float, float, float, float, float, float, float, int, int, int, bool],
+    float
+] = vector_case.lib.calculate_mutual_inductance_raw
+"""
+Handle to the C function.
+
+The order of arguments is: r_1, R_1, L_1, N_1, r_2, R_2, L_2, N_2, d, k_terms, l_terms, n_terms, is_verbose
+"""
 
 
 if __name__ == "__main__":
@@ -130,7 +144,7 @@ if __name__ == "__main__":
     d = 0.1
 
     # Using directly the C function
-    inductance = vector_case.lib.calculate_mutual_inductance_raw(
+    inductance = calculate_mutual_inductance(
         r_1, R_1, L_1, N_1, r_2, R_2, L_2, N_2, d, k_terms, l_terms, n_terms, True
     )
     print("Calculated Inductance:", inductance)
