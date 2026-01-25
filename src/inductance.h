@@ -3,6 +3,7 @@
 
 #include "inductance_near.h"
 #include "inductance_far.h"
+#include "inductance_radial.h"
 
 
 /**
@@ -39,20 +40,26 @@ FP_TYPE calculate_mutual_inductance(
         fprintf(stderr, "Error: Number of terms must be positive\n");
         return -1.0;
     }
-    if (d <= 0.0) {
-        fprintf(stderr, "Error: The distance between the coils must be positive\n");
+    if (d <= 0.0 && data.R_1 > data.r_2) {
+        fprintf(
+            stderr,
+            "Error: Two coils cannot physically overlap. "
+            "If the distance d is negative, the outer radius of the first coil must be larger than "
+            "the inner radius of the second coil.\n"
+        );
         return -1.0;
     }
 
-    FP_TYPE R = data.R_1 > data.R_2 ? data.R_1 : data.R_2;
-    FP_TYPE L = data.L_1;
+    const FP_TYPE R = data.R_1 > data.R_2 ? data.R_1 : data.R_2;
+    const FP_TYPE L = data.L_1;
+    const bool radial_case = data.r_2 >= data.R_1;
 
     if (verbose && (precision.k_terms != precision.l_terms)) {
         printf("Warning: precision.k_terms == precision.l_terms is recommended in general\n");
     }
 
     if (data.L_1 <= 2 * R) {
-        if (d > 3.0 * R - L) {
+        if (d > 0 && d > 3.0 * R - L) {
             if (precision.k_terms > MAX_TERMS_FAR || precision.l_terms > MAX_TERMS_FAR || precision.n_terms > MAX_TERMS_FAR) {
                 fprintf(stderr, "Error: Number of terms exceeds the maximum allowed value of %d\n", MAX_TERMS_FAR);
                 return -1.0;
@@ -68,6 +75,11 @@ FP_TYPE calculate_mutual_inductance(
                 fprintf(stderr, "Error: Number of terms exceeds the maximum allowed value of %d\n", MAX_TERMS_NEAR);
                 return -1.0;
             }
+
+            if (radial_case) {
+                return calculate_mutual_inductance_radial(data, 0.0, data.L_1 + d, 1e-16, verbose);
+            }
+
             if (verbose && (precision.n_terms != 2 * precision.k_terms)) {
                 printf("Warning: precision.n_terms == 2 * precision.k_terms is recommended in general\n");
             }
@@ -78,7 +90,7 @@ FP_TYPE calculate_mutual_inductance(
         }
     }
     else {
-        if (d > data.L_1) {
+        if (d > 0.0 && d > data.L_1) {
             if (precision.k_terms > MAX_TERMS_FAR || precision.l_terms > MAX_TERMS_FAR || precision.n_terms > MAX_TERMS_FAR) {
                 fprintf(stderr, "Error: Number of terms exceeds the maximum allowed value of %d\n", MAX_TERMS_FAR);
                 return -1.0;
@@ -94,6 +106,11 @@ FP_TYPE calculate_mutual_inductance(
                 fprintf(stderr, "Error: Number of terms exceeds the maximum allowed value of %d\n", MAX_TERMS_NEAR);
                 return -1.0;
             }
+
+            if (radial_case) {
+                return calculate_mutual_inductance_radial(data, 0.0, d, 1e-16, verbose);
+            }
+
             if (verbose && (precision.n_terms != 2 * precision.k_terms)) {
                 printf("Warning: precision.n_terms == 2 * precision.k_terms is recommended in general\n");
             }
@@ -125,7 +142,7 @@ FP_TYPE calculate_mutual_inductance(
  * @param verbose Whether to print the results and performance of the optimization process.
  * @return The calculated mutual inductance.
  */
-FP_TYPE calculate_mutual_inductance_raw(
+static FP_TYPE calculate_mutual_inductance_raw(
         const FP_TYPE r_1,
         const FP_TYPE R_1,
         const FP_TYPE L_1,

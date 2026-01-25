@@ -2,12 +2,12 @@
 #define VECTOR_CASE_INDUCTANCE_NAIVE_H
 
 #include <stdio.h>
-#include <time.h>
 #include <math.h>
 #include <stdbool.h>
 
 #include "structs.h"
 #include "factorial_lookup.h"
+#include "timing.h"
 
 
 /**
@@ -31,10 +31,10 @@ double calculate_mutual_inductance_far_unoptimized(
 ) {
     double M_12 = 0.0;
 
-    struct timespec start_time;
+    Timer timer;
 
     if (timing) {
-        timespec_get(&start_time, TIME_UTC);
+        timer_start(&timer);
     }
 
     for (uint32_t n = 0; n < precision.n_terms; ++n) {
@@ -69,11 +69,7 @@ double calculate_mutual_inductance_far_unoptimized(
           / (data.L_2 * (data.R_1 - data.r_1) * (data.R_2 - data.r_2));
 
     if (timing) {
-        struct timespec end_time;
-        timespec_get(&end_time, TIME_UTC);
-
-        double interval = (double) (end_time.tv_sec - start_time.tv_sec)
-                        + (double) (end_time.tv_nsec - start_time.tv_nsec) * 1e-9;
+        const double interval = timer_elapsed(&timer);
         printf("Unoptimized Time = %g s\n", interval);
     }
 
@@ -108,10 +104,10 @@ double calculate_mutual_inductance_near_unoptimized_normed(
 ) {
     double M_12 = 0.0;
 
-    struct timespec start_time;
+    Timer timer;
 
     if (timing) {
-        timespec_get(&start_time, TIME_UTC);
+        timer_start(&timer);
     }
 
     for (uint32_t n = 0; n < precision.n_terms; ++n) {
@@ -148,11 +144,7 @@ double calculate_mutual_inductance_near_unoptimized_normed(
           / (data.L_1 * data.L_2 * (data.R_1 - data.r_1) * (data.R_2 - data.r_2));
 
     if (timing) {
-        struct timespec end_time;
-        timespec_get(&end_time, TIME_UTC);
-
-        double interval = (double) (end_time.tv_sec - start_time.tv_sec)
-                          + (double) (end_time.tv_nsec - start_time.tv_nsec) * 1e-9;
+        const double interval = timer_elapsed(&timer);
         printf("Unoptimized Time = %g s\n", interval);
     }
 
@@ -183,10 +175,10 @@ double calculate_mutual_inductance_near_unoptimized(
 ) {
     double M_12 = 0.0;
 
-    struct timespec start_time;
+    Timer timer;
 
     if (timing) {
-        timespec_get(&start_time, TIME_UTC);
+        timer_start(&timer);
     }
 
     for (uint32_t n = 0; n < precision.n_terms; ++n) {
@@ -221,11 +213,7 @@ double calculate_mutual_inductance_near_unoptimized(
           / (data.L_1 * data.L_2 * (data.R_1 - data.r_1) * (data.R_2 - data.r_2));
 
     if (timing) {
-        struct timespec end_time;
-        timespec_get(&end_time, TIME_UTC);
-
-        double interval = (double) (end_time.tv_sec - start_time.tv_sec)
-                          + (double) (end_time.tv_nsec - start_time.tv_nsec) * 1e-9;
+        const double interval = timer_elapsed(&timer);
         printf("Unoptimized Time = %g s\n", interval);
     }
 

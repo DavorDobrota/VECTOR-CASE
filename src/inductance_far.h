@@ -1,12 +1,11 @@
 #ifndef VECTOR_CASE_FAR_INDUCTANCE_H
 #define VECTOR_CASE_FAR_INDUCTANCE_H
 
-#include <math.h>
 #include <stdio.h>
-#include <time.h>
 
 #include "structs.h"
 #include "sum_lookup_table_far.h"
+#include "timing.h"
 
 #if defined(USE_SSE) || defined(USE_AVX) || defined(USE_AVX512)
 #include "immintrin.h"
@@ -260,10 +259,7 @@ double calculate_mutual_inductance_far(
  * @param precision The precision struct to use for the benchmark
  * @param n_repeats The number of times to repeat the calculation
  */
-void benchmark_mutual_inductance_far(const SumPrecisionData precision, const uint32_t n_repeats) {
-    struct timespec start_time;
-    struct timespec end_time;
-
+static void benchmark_mutual_inductance_far(const SumPrecisionData precision, const uint32_t n_repeats) {
     CoilCalculationData data = {
             .R_1 = 0.1,
             .r_1 = 0.05,
@@ -276,23 +272,21 @@ void benchmark_mutual_inductance_far(const SumPrecisionData precision, const uin
     };
 
     // Volatile to prevent the compiler optimizing out the for loop
-    volatile FP_TYPE result;
+    volatile FP_TYPE result = 0.0;
 
-    timespec_get(&start_time, TIME_UTC);
+    Timer timer;
+    timer_start(&timer);
 
     for (uint32_t i = 0; i < n_repeats; ++i) {
-        result = calculate_mutual_inductance_far(data, precision, 0.1 + (FP_TYPE) i * 0.0001);
+        result += calculate_mutual_inductance_far(data, precision, 0.3 + (FP_TYPE) i * 0.0001);
     }
 
-    timespec_get(&end_time, TIME_UTC);
+    const double interval = timer_elapsed(&timer);
 
-    double interval = (double) (end_time.tv_sec - start_time.tv_sec)
-                      + (double) (end_time.tv_nsec - start_time.tv_nsec) * 1e-9;
-
-    printf("\nBenchmarked mutual inductance near with %u repeats\n", n_repeats);
+    printf("\nBenchmarked mutual inductance far with %u repeats\n", n_repeats);
     printf("Precision: L = %u, K = %u, N = %u\n", precision.l_terms, precision.k_terms, precision.n_terms);
     printf("Elapsed time =          %g s\n", interval);
-    printf("Time per iteration =    %g s\n", interval / (double) n_repeats);
+    printf("Time per iteration =    %.3e s\n", interval / (double) n_repeats);
     printf("Result (printed to prevent compiler optimization) = %.15g\n\n", result);
 }
 

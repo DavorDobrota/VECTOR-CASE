@@ -57,6 +57,14 @@ double calculate_mutual_inductance_near(
     const double Z
 );
 
+static double calculate_mutual_inductance_radial(
+    const CoilCalculationData data,
+    const double offset_1,
+    const double offset_2,
+    const double relative_tol,
+    const bool verbose
+);
+
 double calculate_mutual_inductance(
     const CoilCalculationData data,
     const SumPrecisionData precision,
@@ -88,6 +96,12 @@ static void benchmark_mutual_inductance_far(
 static void benchmark_mutual_inductance_near(
     const SumPrecisionData precision,
     const uint32_t n_repeats
+);
+
+static void benchmark_mutual_inductance_radial(
+    const uint32_t n_repeats, 
+    const bool fast, 
+    const double relative_tol
 );
 """
 
