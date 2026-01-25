@@ -1,0 +1,65 @@
+[build-system]
+requires = ["setuptools>=61.0", "cffi>=1.0.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "vector-case-demo"
+version = "1.0.0"
+description = "Python interface for the VECTOR-CASE mutual inductance calculation library"
+readme = "README.md"
+license = {text = "MIT"}
+authors = [
+    {name = "Davor Dobrota"}
+]
+requires-python = ">=3.9"
+classifiers = [
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Engineering :: Physics",
+]
+keywords = ["inductance", "coil", "electromagnetics", "physics"]
+dependencies = [
+    "cffi>=1.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "mypy>=1.0",
+    "ruff>=0.1.0",
+]
+
+plotting = [
+    "matplotlib>=3.0",
+]
+
+[tool.setuptools]
+packages = ["vector_case_py"]
+
+[tool.setuptools.package-data]
+vector_case_py = ["py.typed"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py39"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "D", "UP", "B", "C4", "SIM"]
+ignore = ["D100", "D104"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "numpy"
+
+[tool.mypy]
+python_version = "3.9"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true

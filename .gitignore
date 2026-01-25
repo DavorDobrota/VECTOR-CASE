@@ -35,3 +35,5 @@ nbproject/
 *.exe
 *.out
 *.app
+
+demo/vector_case.c
